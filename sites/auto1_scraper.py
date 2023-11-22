@@ -5,6 +5,7 @@ from __utils import (
     GetRequestJson,
     Item,
     UpdateAPI,
+    get_county,
 )
 
 
@@ -31,7 +32,7 @@ def scraper():
                 job_link = f'https://www.auto1-group.com/en/jobs/{job["_source"]["url"]}',
                 company = 'Auto1Group',
                 country = 'Romania',
-                county = 'Bucuresti',
+                county = get_county(town),
                 city = town,
                 remote = 'on-site',
             ).to_dict())
