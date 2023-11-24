@@ -23,7 +23,7 @@ def scraper():
             job_title = job['name'],
             job_link = 'https://clevertech.biz/remote-jobs/' + job['slug'],
             company = 'Clevertech',
-            country = '',
+            country = 'Romania',
             county = '',
             city = '',
             remote = 'remote',
