@@ -16,14 +16,20 @@ def scraper():
 
     for job in soup.find_all('div', attrs = {'class': 'job-list'}):
 
+        city = job.find('span', attrs = {'class': 'office-location'}).text
+        if city == 'Chișineu Criș':
+            city = 'Chisineu Cris'
+        if city == 'Timișoara':
+            city = 'Timisoara'
+
         # get jobs items from response
         job_list.append(Item(
             job_title = job.find('h4').text,
             job_link = job.find('h4').find('a')['href'],
             company = 'AscentGroup',
             country = 'Romania',
-            county = get_county(job.find('span', attrs = {'class': 'office-location'}).text),
-            city = job.find('span', attrs = {'class': 'office-location'}).text,
+            county = get_county(city),
+            city = city,
             remote = get_job_type(job.find_all('span', attrs = {'class': 'job-type part-time'})[-1].text),
         ).to_dict())
 
