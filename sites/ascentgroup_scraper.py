@@ -1,3 +1,6 @@
+# Company ---> AscentGroup
+# Link ------> https://www.ascentjobs.ro/lista-joburi/
+
 from __utils import (
     GetStaticSoup,
     Item,

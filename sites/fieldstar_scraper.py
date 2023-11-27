@@ -1,3 +1,6 @@
+# Company ---> FieldStar
+# Link ------> https://www.fieldstar.ro/jobs/
+
 from __utils import (
     GetStaticSoup,
     get_county,
