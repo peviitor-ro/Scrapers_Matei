@@ -1,7 +1,5 @@
 from __utils import (
     GetStaticSoup,
-    get_county,
-    get_job_type,
     Item,
     UpdateAPI,
 )
@@ -18,9 +16,14 @@ def scraper():
 
         city = job.find('span', attrs = {'class': 'office-location'}).text
         if city == 'Chișineu Criș':
-            city = 'Chisineu Cris'            # SCOATE DIACRITICELE, GET_COUNTY NU POATE
+            city = 'Chisineu Cris'            # SCOATE DIACRITICELE
+            county = 'Arad'                   # GET_COUNTY NU POATE
         if city == 'Timișoara':
             city = 'Timisoara'
+            county = 'Timis'
+        else:
+            county = 'Arad'
+
 
         # get jobs items from response
         job_list.append(Item(
@@ -28,9 +31,9 @@ def scraper():
             job_link = job.find('h4').find('a')['href'],
             company = 'AscentGroup',
             country = 'Romania',
-            county = '',
+            county = county,
             city = city,
-            remote = get_job_type(job.find_all('span', attrs = {'class': 'job-type part-time'})[-1].text),
+            remote = job.find_all('span', attrs = {'class': 'job-type part-time'})[-1].text,
         ).to_dict())
 
     return job_list
