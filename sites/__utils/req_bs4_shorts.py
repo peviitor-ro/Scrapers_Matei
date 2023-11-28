@@ -82,13 +82,6 @@ class PostRequestJson:
         except ValueError as e:
             pass
 
-        # second try
-        try:
-            html_response = response.text
-            return BeautifulSoup(html_response, 'lxml')
-        except ValueError as e:
-            pass
-
 
 class GetHtmlSoup:
     '''
