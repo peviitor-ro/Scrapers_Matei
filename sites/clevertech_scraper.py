@@ -2,18 +2,26 @@
 # Link ------> https://clevertech.biz/jobs
 
 from __utils import (
+    GetStaticSoup,
     GetRequestJson,
     Item,
     UpdateAPI,
 )
 
 
+def get_id():
+
+    soup = GetStaticSoup('https://clevertech.biz/jobs')
+    script_id = soup.find_all('script', attrs = {'src': '/_next/static/GP71h1Ih1nzvHYndylkaB/_ssgManifest.js'})
+    script_key = str(script_id).split('/')[3]
+
+    return script_key
+
 def scraper():
 
     # scrape data from clevertech scraper.
-
-    json_data = GetRequestJson('https://clevertech.biz/_next/data/AGrh3n8knChzMTSDHJ4Pz/jobs/apply.json?applicationType=default')
-
+    key = get_id()
+    json_data = GetRequestJson(f'https://clevertech.biz/_next/data/{key}/jobs/apply.json?applicationType=default')
     job_list = []
 
     for job in json_data['pageProps']['activeJobs']:
