@@ -1,9 +1,6 @@
-#
-#
-#
+
 # Function to get type of job;
-#
-#
+
 
 def get_job_type(job_type: str) -> str:
     '''
