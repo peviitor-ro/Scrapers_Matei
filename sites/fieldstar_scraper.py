@@ -41,7 +41,7 @@ def scraper():
             city = city_job,
             remote = get_job_type(remote),
         ).to_dict())
-    print(job_list)
+
     return job_list
 
 
