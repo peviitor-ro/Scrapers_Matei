@@ -1,6 +1,6 @@
 import requests
 
-url = "https://dev.laurentiumarian.ro/scraper/Scrapers_start_with_digi/"
+url = "https://dev.laurentiumarian.ro/scraper/Scrapers_Matei/"
 
 r = requests.post(url, data = {"update": "true"})
 
