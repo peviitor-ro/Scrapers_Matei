@@ -12,10 +12,16 @@ from __utils import (
 def get_id():
 
     soup = GetStaticSoup('https://clevertech.biz/jobs')
-    script_id = soup.find_all('script', attrs = {'src': '/_next/static/mLGCzR2MvQ2raqvmFxc3w/_ssgManifest.js'})
-    script_key = str(script_id).split('/')[3]
+    script_tags = soup.find_all('script')
+    extracted_string = None
+    
+    for script_tag in reversed(script_tags):
+        src = script_tag.get('src')
+        if src and "_next/static/" in src:
+            extracted_string = src.split("/")[3]
+            break
 
-    return script_key
+    return extracted_string
 
 def scraper():
 
