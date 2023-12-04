@@ -14,7 +14,7 @@ def get_id():
     soup = GetStaticSoup('https://clevertech.biz/jobs')
     script_tags = soup.find_all('script')
     extracted_string = None
-    
+
     for script_tag in reversed(script_tags):
         src = script_tag.get('src')
         if src and "_next/static/" in src:
