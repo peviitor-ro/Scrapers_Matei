@@ -36,7 +36,7 @@ def scraper():
                     job_link = link,
                     company = 'Inoveco',
                     country = 'Romania',
-                    county = get_county('Ilfov'),
+                    county = 'Ilfov',
                     city = 'Ilfov',
                     remote = 'on-site',
                 ).to_dict())
