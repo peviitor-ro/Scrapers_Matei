@@ -1,4 +1,4 @@
-# Company ---> artnerd
+# Company ---> Partnerd
 # Link ------> https://partnerd.teamtailor.com/jobs
 
 from __utils import (
