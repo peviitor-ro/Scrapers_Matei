@@ -65,7 +65,7 @@ def scraper():
 def main():
 
     company_name = "Diversey"
-    logo_link = "https://diversey.com/themes/custom/diversey/logo.png"
+    logo_link = "https://findlogovector.com/wp-content/uploads/2019/01/diversey-logo-vector.png"
 
     jobs = scraper()
 
