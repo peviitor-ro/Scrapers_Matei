@@ -26,7 +26,7 @@ def scraper():
             country = 'Romania',
             county = get_county('Bucuresti'),
             city = 'Bucuresti',
-            remote = 'on-site',
+            remote = '',
         ).to_dict())
 
     return job_list
