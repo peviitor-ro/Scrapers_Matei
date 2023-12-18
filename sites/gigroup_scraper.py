@@ -1,8 +1,8 @@
 # Company ---> GiGroup
 # Link ------> https://ro.gigroup.com/oferta-noastra-de-locuri-de-munca
-
+import requests
+from bs4 import BeautifulSoup
 from __utils import (
-    PostRequestJson,
     get_county,
     Item,
     UpdateAPI,
@@ -22,7 +22,7 @@ def prepare_post_request() -> tuple:
         'Origin': 'https://ro.gigroup.com',
         'Referer': 'https://ro.gigroup.com/oferta-noastra-de-locuri-de-munca',
         'Sec-Fetch-Site': 'same-origin',
-        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'X-Requested-With': 'XMLHttpRequest',
     }
 
@@ -32,18 +32,16 @@ def prepare_post_request() -> tuple:
 def scraper():
 
     # scrape data from GiGroup scraper.
-
-
     url, headers = prepare_post_request()
+    session = requests.Session()
 
     # list with data
     job_list = []
-
     offset = 0
     flag = True
 
     while flag:
-        json_data = PostRequestJson(url=url, custom_headers=headers, data_raw={
+        response = session.post(url=url, headers=headers, data={
                 "X_GUMM_REQUESTED_WITH": "XMLHttpRequest",
                 "action": "scrollpagination",
                 "numberLimit": 30,
@@ -51,6 +49,7 @@ def scraper():
             })
 
         # get data and add to offset
+        json_data = soup = BeautifulSoup(response.text, 'html.parser')
         data = len(json_data.find_all('article'))
         if data > 0:
             offset += 30
