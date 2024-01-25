@@ -49,7 +49,7 @@ def scraper():
             })
 
         # get data and add to offset
-        json_data = soup = BeautifulSoup(response.text, 'html.parser')
+        json_data = BeautifulSoup(response.text, 'html.parser')
         data = len(json_data.find_all('article'))
         if data > 0:
             offset += 30
