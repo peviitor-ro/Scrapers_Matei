@@ -1,10 +1,3 @@
-#
-#
-#  You can create new files for scrapers from ->
-#  ... your terminal. For example:
-#  python3 __create_scraper.py "name_scraper" "link" "type_scraper"
-#  Its really useful when you have a lot of scrapers
-#
 #  You can create your own scraper:
 #  ... static
 #  ... dynamic_json_get
@@ -18,7 +11,7 @@ import os
 
 #  ---------------------> STATIC SCRAPER <---------------------
 def create_static_scraper_config(nume_scraper, link):
-    config_content = f"""#
+    config_content = f"""
 # Company ---> {nume_scraper}
 # Link ------> {link}
 
@@ -77,7 +70,7 @@ if __name__ == '__main__':
 
 #  ---------------------> DYNAMIC JSON GET <---------------------
 def create_dynamic_json_get_scraper_config(nume_scraper, link):
-    config_content = f"""#
+    config_content = f"""
 # Company ---> {nume_scraper}
 # Link ------> {link}
 
@@ -136,24 +129,10 @@ if __name__ == '__main__':
 
 #  ---------------------> DYNAMIC JSON POST <---------------------
 def create_dynamic_json_post_scraper_config(nume_scraper, link):
-    config_content = f"""#
-#
-# Config for Dynamic Post Method -> For Json format!
-#  ... project made by Andrei Cojocaru
-#  LinkedIn: https://www.linkedin.com/in/andrei-cojocaru-985932204/
-#  Github: https://github.com/andreireporter13
-#
+    config_content = f"""
 # Company ---> {nume_scraper}
 # Link ------> {link}
-#
-# ------ IMPORTANT! ------
-# if you need return soup object:
-# you cand import from __utils -> GetHtmlSoup
-# if you need return regex object:
-# you cand import from __utils ->
-# ---> get_data_with_regex(expression: str, object: str)
-#
-#
+
 from __utils import (
     PostRequestJson,
     get_county,
@@ -163,66 +142,10 @@ from __utils import (
 )
 
 
-'''
-    Daca deja te-ai deprins cu aceasta formula de cod,
-    atunci poti sterge acest comentariu din fisierul
-    __create_scraper.py, din functia - create_static_scraper_config -.
-
-    Deci:
-    ########################################################################
-
-    1) --->  clasa PostRequestJson returneaza un obiect Json in urma unui
-    post request direct in instanta.
-
-    json_data = PostRequestJson(link, custom_headers, data)
-    -> si returneaza datele din acel fisier json dupa un post request,
-    direct in instanta.
-    Uneori e nevoie de headere mai deosebite pentru post requests,
-    ceea ce inseamna ca trebuie o logica mai avansata. Dar nu e nimic greu.
-
-    --------------IMPORTANT----------------
-    La nivel de proiect, ca o variabila globala, este definit Session()!
-    ... acest session inseamna ca orice clasa va putea folosi
-    ... aceeasi sesiune, practic se va evita multiple requests;
-
-    ########################################################################
-
-    2) ---> get_county(nume_localitat) -> returneaza numele judetului;
-    poti pune chiar si judetul, de exemplu, nu va fi o eroare.
-
-    ########################################################################
-
-    3) --->get_job_type(job_type: str) -> returneaza job_type-ul: remote,
-    hybrid, on-site
-
-    ########################################################################
-
-    4) ---> Item -> este un struct pentru datele pe care le vom stoca in lista
-    si, apoi, le vom trimite catre API.
-    exemplu: list_jobs.append(Item(job_title="titlu_str",
-                                    job_link="link",
-                                    company="nume_companie",
-                                    country="Romania",
-                                    county="Judetul",
-                                    city="Orasul",
-                                    remote="remote, onsite sau hibryd"))
-
-    ########################################################################
-
-    5) ---> clasa UpdateAPI are doua metode:
-    update_jobs(lista_dict_joburi) si update_logo(nume_companie, link_logo)
-
-    UpdateAPI().update_jobs(company_name: str, data_jobs: list)
-    UpdateAPI().update_logo(id_company: str, logo_link: str)
-
-    ########################################################################
-'''
-
-
 def scraper():
-    '''
-    ... scrape data from {nume_scraper} scraper.
-    '''
+
+    # scrape data from {nume_scraper} scraper.
+
     json_data = PostRequestJson("{link}", custom_headers=headers, data=data_row)
 
     job_list = []
@@ -244,11 +167,6 @@ def scraper():
 
 
 def main():
-    '''
-    ... Main:
-    ---> call scraper()
-    ---> update_jobs() and update_logo()
-    '''
 
     company_name = "{nume_scraper}"
     logo_link = "logo_link"
@@ -270,24 +188,10 @@ if __name__ == '__main__':
 
 #  ---------------------> DYNAMIC RENDER <---------------------
 def create_dynamic_render_scraper_config(nume_scraper, link):
-    config_content = f"""#
-#
-# Configurare pentru Scraperul Dynamic Render!
-#  ... project made by Andrei Cojocaru
-#  LinkedIn: https://www.linkedin.com/in/andrei-cojocaru-985932204/
-#  Github: https://github.com/andreireporter13
-#
+    config_content = f"""
 # Company ---> {nume_scraper}
 # Link ------> {link}
-#
-# ------ IMPORTANT! ------
-# if you need return soup object:
-# you cand import from __utils -> GetHtmlSoup
-# if you need return regex object:
-# you cand import from __utils ->
-# ---> get_data_with_regex(expression: str, object: str)
-#
-#
+
 from __utils import (
     GetDynamicSoup,
     get_county,
@@ -297,69 +201,10 @@ from __utils import (
 )
 
 
-'''
-    Daca deja te-ai deprins cu aceasta formula de cod,
-    atunci poti sterge acest comentariu din fisierul
-    __create_scraper.py, din functia - create_static_scraper_config -.
-
-    Deci:
-    ########################################################################
-
-    1) --->  clasa GetDynamicSoup returneaza un obiect HTML in urma unui
-    request pe un site dinamic, car se incarca cu javascript.
-
-    De obicei unele site-uri nu pot fi scrapuite cu get request sau cu post request.
-    Motive sunt diferite. Dar, folosind GetDynamicSoup, putem sa returnam un html
-    care sta in spatele unui cod de JS.
-
-    get_dynamic_soup = GetDynamicSoup(link) -> si primim html intr-un obiect BeautifulSoup.
-
-    Putem sa-i dam si headere:
-    GetDynamicSoup(link, custom_headers=headers)
-
-    --------------IMPORTANT----------------
-    La nivel de proiect, ca o variabila globala, este definit Session()!
-    ... acest session inseamna ca orice clasa va putea folosi
-    ... aceeasi sesiune, practic se va evita multiple requests;
-
-    ########################################################################
-
-    2) ---> get_county(nume_localitat) -> returneaza numele judetului;
-    poti pune chiar si judetul, de exemplu, nu va fi o eroare.
-
-    ########################################################################
-
-    3) --->get_job_type(job_type: str) -> returneaza job_type-ul: remote,
-    hybrid, on-site
-
-    ########################################################################
-
-    4) ---> Item -> este un struct pentru datele pe care le vom stoca in lista
-    si, apoi, le vom trimite catre API.
-    exemplu: list_jobs.append(Item(job_title="titlu_str",
-                                    job_link="link",
-                                    company="nume_companie",
-                                    country="Romania",
-                                    county="Judetul",
-                                    city="Orasul",
-                                    remote="remote, onsite sau hibryd"))
-
-    ########################################################################
-
-    5) ---> clasa UpdateAPI are doua metode:
-    update_jobs(lista_dict_joburi) si update_logo(nume_companie, link_logo)
-
-    UpdateAPI().update_jobs(company_name: str, data_jobs: list)
-    UpdateAPI().update_logo(id_company: str, logo_link: str)
-
-    ########################################################################
-    '''
-
-
 def scraper():
-    '''
-    ... scrape data from {nume_scraper} scraper.
-    '''
+
+    # scrape data from {nume_scraper} scraper.
+
     soup = GetDynamicSoup("{link}")
 
     job_list = []
@@ -381,11 +226,6 @@ def scraper():
 
 
 def main():
-    '''
-    ... Main:
-    ---> call scraper()
-    ---> update_jobs() and update_logo()
-    '''
 
     company_name = "{nume_scraper}"
     logo_link = "logo_link"
@@ -408,20 +248,10 @@ if __name__ == '__main__':
 
 #  ---------------------> CUSTOM SCRAPER <---------------------
 def create_custom_scraper_config(nume_scraper, link):
-    config_content = f"""#
-#
-# Your custom scraper here ---> Last level!
-#
+    config_content = f"""
 # Company ---> {nume_scraper}
 # Link ------> {link}
-#
-#
-# Aici va invit sa va creati propriile metode de scraping cu Python,
-# ... folosind:
-# -> requests
-# -> BeautifulSoup
-# -> requests_html etc.
-#
+
 from __utils import Item
 import requests
 from bs4 import BeautifulSoup
@@ -429,14 +259,13 @@ from bs4 import BeautifulSoup
 
 
 def scraper():
-    '''
-    ... scrape data from {nume_scraper} scraper.
-    Your solution!
-    '''
+
+    # scrape data from {nume_scraper} scraper.
 
     job_list = []
+    
     for job in []:
-
+    
         # get jobs items from response
         job_list.append(Item(
             job_title='',
@@ -450,11 +279,6 @@ def scraper():
 
 
 def main():
-    '''
-    ... Main:
-    ---> call scraper()
-    ---> update_jobs() and update_logo()
-    '''
 
     company_name = "{nume_scraper}"
     logo_link = "logo_link"
