@@ -9,6 +9,7 @@ from .req_bs4_shorts import(
     PostRequestJson,
     GetHtmlSoup,
     GetHeadersDict,
+    GetXMLObject,
 )
 from .req_bs4_shorts import GetHtmlSoup
 from .dynamic_requests_html_shorts import GetDynamicSoup
