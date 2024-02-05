@@ -32,7 +32,7 @@ def scraper():
                 job_link = 'https://jobs.jti.com' + str(job.find('a')['href']),
                 company = 'jti',
                 country = job.find('span', class_ = 'jobShifttype visible-phone').text.strip(),
-                county = get_county(get_city),
+                county = '',
                 city = get_city,
                 remote = '',
             ).to_dict())
