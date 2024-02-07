@@ -25,7 +25,7 @@ def scraper():
             oras = 'Ploiesti'
         elif oras == 'Ilfov':
             oras = 'Branesti'
-        elif oras == '':
+        elif oras == 'Romania':
             oras = 'Ploiesti'
 
         # get jobs items from response
