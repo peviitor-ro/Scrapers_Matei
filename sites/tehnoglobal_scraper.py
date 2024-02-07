@@ -18,16 +18,19 @@ def scraper():
     job_list = []
     
     for job in soup.find_all('div', class_ = 'item-job'):
-
+        title = job.find('h5').text.strip()
+        if title == title.upper():
+            get_remote = 'on-site'
+        else: get_remote = ''
         # get jobs items from response
         job_list.append(Item(
-            job_title = job.find('h5').text.strip(),
+            job_title = title,
             job_link = job.find('h5').find('a')['href'],
             company = 'TehnoGlobal',
             country = 'Romania',
             county = get_county('Cluj-Napoca'),
-            city = 'Cluj',
-            remote = '',
+            city = 'Cluj-Napoca',
+            remote = get_remote,
         ).to_dict())
 
     return job_list
