@@ -61,27 +61,10 @@ def get_headers(token):
     return headers
 
 
-def extract_city_name(text):
-    coduri_postale = re.findall(r'\b\d{6}\b', text)
+def extract_addresses(text):
+    matches = re.findall(r'\d{6}\s(.+?)\s(?:Sos|Str|Strada|Bd|1|Crangasi|Calea)', text)
 
-    if coduri_postale:
-        for cod in coduri_postale:
-            index_cod = text.find(cod)                              # COD POSTAL
-            rest_text = text[index_cod + len(cod):] if index_cod != -1 else None
-
-            if rest_text:
-                cuvinte_dupa_cod = rest_text.split()
-                if len(cuvinte_dupa_cod) >= 2:
-                    primele_doua_cuvinte = " ".join(
-                        cuvinte_dupa_cod[:2])                       # PRIMELE 2 CUV DUPA COD
-
-                if get_county(primele_doua_cuvinte) is None:
-                    index_ultimul_spatiu = primele_doua_cuvinte.rfind(" ")  # VERIFIC DACA E OK ORASUL
-
-                    if index_ultimul_spatiu != -1:
-                        ultimul_cuvant_pana_la_spatiu = primele_doua_cuvinte[:index_ultimul_spatiu]
-                        return ultimul_cuvant_pana_la_spatiu
-
+    return matches
 
 def scraper():
     url, raw_headers = get_raw_headers()
@@ -93,9 +76,8 @@ def scraper():
 
     for job in soup.find_all('a', class_='karrierjob'):
         orase = job.find('p', class_='karrierjob__p').text.strip()
-
-        # Use extract_city_name function to get the city name
-        nume_oras = extract_city_name(orase)
+        addresses = extract_addresses(orase)
+        city_name = addresses_str = ', '.join(addresses)
 
         job_list.append(Item(
             job_title=job.find('h3').text.strip(),
@@ -103,7 +85,7 @@ def scraper():
             company = 'Unix',
             country = 'Romania',
             county = '',
-            city = nume_oras,
+            city = city_name,
             remote='',
         ).to_dict())
 
