@@ -78,6 +78,11 @@ def scraper():
         orase = job.find('p', class_='karrierjob__p').text.strip()
         addresses = extract_addresses(orase)
         city_name = addresses_str = ', '.join(addresses)
+        
+        if city_name == 'Cluj Napoca':
+            city_name = 'Cluj-Napoca'
+        elif city_name == 'T\u00e2rgu Mures':
+            city_name = 'Targu Mures'
 
         job_list.append(Item(
             job_title=job.find('h3').text.strip(),
