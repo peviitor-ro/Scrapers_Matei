@@ -28,6 +28,7 @@ def scraper():
 
         if not oras:
             remote_status = 'remote'
+            oras = ''
         else:
             remote_status = ''
         # get jobs items from response
