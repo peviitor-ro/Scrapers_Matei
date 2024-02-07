@@ -18,7 +18,18 @@ def scraper():
     job_list = []
 
     for job in soup.find_all('div', class_ = 'offer-card-body'):
+        oras = job.find('div', class_='field__item').text.split()[-1]
+        if oras == 'Cluj':
+            oras = 'Cluj-Napoca'
+        elif oras == 'Prahova':
+            oras = 'Ploiesti'
+        elif oras == 'Ilfov':
+            oras = 'Branesti'
 
+        if not oras:
+            remote_status = 'remote'
+        else:
+            remote_status = ''
         # get jobs items from response
         job_list.append(Item(
             job_title = job.find('span').text.strip(),
@@ -26,8 +37,8 @@ def scraper():
             company = 'SaintGobain',
             country = 'Romania',
             county = '',
-            city = job.find('div', class_ = 'field__item').text.split()[-1],
-            remote = '',
+            city = oras,
+            remote = remote_status,
         ).to_dict())
 
     return job_list
