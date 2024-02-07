@@ -82,7 +82,7 @@ def scraper():
         if city_name == 'Cluj Napoca':
             city_name = 'Cluj-Napoca'
         elif city_name == 'T\u00e2rgu Mures':
-            city_name = 'Targu Mures'
+            city_name = 'Targu-Mures'
 
         job_list.append(Item(
             job_title=job.find('h3').text.strip(),
