@@ -16,7 +16,7 @@ def scraper():
 
     soup = GetStaticSoup("https://joinus.saint-gobain.com/ro?f%5B0%5D=tara%3Aro")
     job_list = []
-    
+
     for job in soup.find_all('div', class_ = 'offer-card-body'):
 
         # get jobs items from response
@@ -25,8 +25,8 @@ def scraper():
             job_link = 'https://joinus.saint-gobain.com' + job.find('a')['href'],
             company = 'SaintGobain',
             country = 'Romania',
-            county = job.find('div', class_ = 'field__item').text.split()[-1],
-            city = '',
+            county = '',
+            city = job.find('div', class_ = 'field__item').text.split()[-1],
             remote = '',
         ).to_dict())
 
