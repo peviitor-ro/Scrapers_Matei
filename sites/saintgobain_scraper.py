@@ -25,12 +25,9 @@ def scraper():
             oras = 'Ploiesti'
         elif oras == 'Ilfov':
             oras = 'Branesti'
+        elif oras == '':
+            oras = 'Ploiesti'
 
-        if not oras:
-            remote_status = 'remote'
-            oras = ''
-        else:
-            remote_status = ''
         # get jobs items from response
         job_list.append(Item(
             job_title = job.find('span').text.strip(),
@@ -39,7 +36,7 @@ def scraper():
             country = 'Romania',
             county = '',
             city = oras,
-            remote = remote_status,
+            remote = '',
         ).to_dict())
 
     return job_list
