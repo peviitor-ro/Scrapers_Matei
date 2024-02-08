@@ -30,7 +30,7 @@ def scraper():
             job_list.append(Item(
                 job_title = job['_source']['title'],
                 job_link = f'https://www.auto1-group.com/en/jobs/{job["_source"]["url"]}',
-                company = 'Auto1Group',
+                company = 'auto1',
                 country = 'Romania',
                 county = get_county(town),
                 city = town,
@@ -44,7 +44,7 @@ def scraper():
 
 def main():
 
-    company_name = "Auto1Group"
+    company_name = "auto1"
     logo_link = "https://www.auto1-group.com/images/logo-auto1-group-v4.svg"
 
     jobs = scraper()
