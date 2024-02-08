@@ -19,7 +19,7 @@ def scraper():
 
         city = job.find('span', attrs = {'class': 'office-location'}).text
         if city == 'Chișineu Criș':
-            city = 'Chisineu Cris'            # SCOATE DIACRITICELE
+            city = 'Chisineu-Cris'            # SCOATE DIACRITICELE
             county = 'Arad'                   # GET_COUNTY NU POATE
         if city == 'Timișoara':
             city = 'Timisoara'
