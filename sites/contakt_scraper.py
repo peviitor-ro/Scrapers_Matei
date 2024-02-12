@@ -20,7 +20,7 @@ def scraper():
 
     for job in soup.find_all('div', class_ = 'c-jobs-list__item-wrapper'):
 
-        location = job.find('div', class_ = 'c-jobs-list__location').text.split(',', 1)[0].strip()
+        location = job.find('div', class_='c-jobs-list__location').text.split(',', 1)[1].strip()
 
         # AU CA SI "APLICA" LINK DE MAIL. INCERC SA IAU LINK-UL DE LA MAIL CU TOT CU SUBIECT
         link = job.find('div', class_ = 'c-jobs-list collapse').find('a')['href']
@@ -54,8 +54,8 @@ def main():
     jobs = scraper()
 
     # uncomment if your scraper done
-    UpdateAPI().update_jobs(company_name, jobs)
-    UpdateAPI().update_logo(company_name, logo_link)
+    # UpdateAPI().update_jobs(company_name, jobs)
+    # UpdateAPI().update_logo(company_name, logo_link)
 
 
 if __name__ == '__main__':
