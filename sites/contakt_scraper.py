@@ -21,7 +21,8 @@ def scraper():
     for job in soup.find_all('div', class_ = 'c-jobs-list__item-wrapper'):
 
         location = job.find('div', class_='c-jobs-list__location').text.split(',', 1)[1].strip()
-
+        if 'sector' in location.lower():
+            location = 'Bucuresti'
         # AU CA SI "APLICA" LINK DE MAIL. INCERC SA IAU LINK-UL DE LA MAIL CU TOT CU SUBIECT
         link = job.find('div', class_ = 'c-jobs-list collapse').find('a')['href']
 
