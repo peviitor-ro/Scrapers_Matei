@@ -27,10 +27,6 @@ def scraper():
         else:
             city = 'Pogoanele'
 
-
-
-
-
         # get jobs items from response
         job_list.append(Item(
             job_title = title,
