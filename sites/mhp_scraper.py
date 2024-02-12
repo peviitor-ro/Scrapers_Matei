@@ -26,14 +26,19 @@ def scraper():
             locations = position['PositionLocation']
 
             for location in locations:
+
+                loc = location['CityName']
+                if loc == 'Cluj':
+                    loc = 'Cluj-Napoca'
+
                 job_list.append(Item(
                     job_title = position['PositionTitle'],
                     job_link = position['PositionURI'],
                     company = 'MHP',
                     country = location['CountryName'],
-                    county = get_county(location['CityName']),
-                    city = location['CityName'],
-                    remote = '',
+                    county = get_county(loc),
+                    city = loc,
+                    remote = 'on-site',
                 ).to_dict())
 
     return job_list
