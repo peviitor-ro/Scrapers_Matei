@@ -65,6 +65,10 @@ def scraper():
             else:
                 location_clear = location_divs
 
+            if location_clear == 'Cluj':
+                location_clear = 'Cluj-Napoca'
+            else: pass
+
             # get jobs items from response
             job_list.append(Item(
                 job_title = job.find('div', attrs={'class': 'titleBlock'}).find('h2').text,
