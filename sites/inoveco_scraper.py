@@ -37,7 +37,7 @@ def scraper():
                     company = 'Inoveco',
                     country = 'Romania',
                     county = 'Ilfov',
-                    city = 'Ilfov',
+                    city = 'Voluntari',
                     remote = 'on-site',
                 ).to_dict())
 
