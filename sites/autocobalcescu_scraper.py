@@ -19,17 +19,24 @@ def scraper():
     
     for job in soup.find_all('div', class_= 'col-12'):
 
+        job_location = job.find('h6', class_='card-title').text.strip()
+        if 'Bucuresti' in job_location:
+            get_city = 'București'
+        elif 'Pitești' in job_location:
+            get_city = 'Pitesti'
+        else:
+            get_city = 'Bucuresti'
         # get jobs items from response
         job_list.append(Item(
             job_title = job.find('h6', class_= 'card-title').text.strip(),
             job_link = job.find('div', class_= 'card-body').find('a')['href'],
             company = 'AutoCobalcescu',
             country = 'Romania',
-            county = '',
-            city = '',
-            remote='',
+            county = get_county(get_city),
+            city = get_city,
+            remote= '',
         ).to_dict())
-
+    print(job_list)
     return job_list
 
 
