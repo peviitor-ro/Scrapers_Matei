@@ -18,18 +18,30 @@ def scraper():
     job_list = []
     
     for job in soup.find_all('div', class_ = 'vc_row wpb_row vc_inner vc_row-fluid'):
+        title = job.find('h3').text.strip()
+        if title == 'Agent achiziții și contractări cereale':
+            city = ['Giurgiu', 'Alexandira', 'Voluntari', 'Calarasi', 'Ialomita', 'Braila', 'Iasi',
+                    'Bacau', 'Suceava', 'Vaslui', 'Botosani']
+        elif title == 'Manager depozit legume-fructe' or title == 'Mecanic întreținere și reparații utilaje':
+            city = 'Crevedia'
+        else:
+            city = 'Pogoanele'
+
+
+
+
 
         # get jobs items from response
         job_list.append(Item(
-            job_title = job.find('h3').text.strip(),
+            job_title = title,
             job_link = job.find('a')['href'],
             company= 'Ados',
             country = 'Romania',
             county = '',
-            city = '',
-            remote = '',
+            city = city,
+            remote = 'on-site',
         ).to_dict())
-
+    print(job_list)
     return job_list
 
 
@@ -41,8 +53,8 @@ def main():
     jobs = scraper()
 
     # uncomment if your scraper done
-    UpdateAPI().update_jobs(company_name, jobs)
-    UpdateAPI().update_logo(company_name, logo_link)
+    # UpdateAPI().update_jobs(company_name, jobs)
+    # UpdateAPI().update_logo(company_name, logo_link)
 
 
 if __name__ == '__main__':
