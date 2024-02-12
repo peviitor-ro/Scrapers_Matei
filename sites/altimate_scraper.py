@@ -22,14 +22,22 @@ def scraper():
         else:
             current_page = GetStaticSoup(f"https://www.altimate.ro/category/cariere/page/{page_num + 1}/")
 
+
         for job in current_page.find_all('div', attrs={'class': 'elementor-post__text'}):
+
+            title = job.find('h2', attrs={'class': 'elementor-post__title'}).text.strip()
+            if 'R\u00e2mnicu V\u00e2lcea' in title:
+                city = 'Ramnicu Valcea'
+            else:
+                city = 'Bucuresti'
+
             job_list.append(Item(
-                job_title=job.find('h2', attrs={'class': 'elementor-post__title'}).text.strip(),
+                job_title= title ,
                 job_link=job.find('h2', attrs={'class': 'elementor-post__title'}).find('a')['href'],
                 company='Altimate',
                 country='Romania',
-                county=get_county('Bucuresti'),
-                city='Bucuresti',
+                county = get_county(city),
+                city = city,
                 remote='on-site',
             ).to_dict())
 
