@@ -13,7 +13,7 @@ def prepare_post_request() -> tuple:
 
     # prepare post request for GiGroup.
 
-    url = 'https://ro.gigroup.com/wp-content/themes/gi-group-child/job-search-infinite-scroll_ALL.php?'
+    url = 'https://ro.gigroup.com/wp-content/themes/gi-group-child/job-search-infinite-scroll_ALL.php?fbclid=IwAR3Av5LpQV66NPEgVKJA7lVOO2JcW9ibjrRCvSa2UT5AX0rhBldAwOiptFE'
 
     headers = {
         'Accept': '*/*',
@@ -44,7 +44,7 @@ def scraper():
         response = session.post(url=url, headers=headers, data={
                 "X_GUMM_REQUESTED_WITH": "XMLHttpRequest",
                 "action": "scrollpagination",
-                "numberLimit": 30,
+                "numberLimit": "30",
                 "offset": offset
             })
 
@@ -79,6 +79,7 @@ def scraper():
                 city = location_clear,
                 remote = 'on-site',
             ).to_dict())
+
 
     return job_list
 
