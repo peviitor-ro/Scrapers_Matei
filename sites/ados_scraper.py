@@ -20,7 +20,7 @@ def scraper():
     for job in soup.find_all('div', class_ = 'vc_row wpb_row vc_inner vc_row-fluid'):
         title = job.find('h3').text.strip()
         if title == 'Agent achiziții și contractări cereale':
-            city = ['Giurgiu', 'Alexandira', 'Voluntari', 'Calarasi', 'Ialomita', 'Braila', 'Iasi',
+            city = ['Giurgiu', 'Alexandria', 'Voluntari', 'Calarasi', 'Slobozia', 'Braila', 'Iasi',
                     'Bacau', 'Suceava', 'Vaslui', 'Botosani']
         elif title == 'Manager depozit legume-fructe' or title == 'Mecanic întreținere și reparații utilaje':
             city = 'Crevedia'
