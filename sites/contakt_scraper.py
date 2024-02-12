@@ -23,6 +23,8 @@ def scraper():
         location = job.find('div', class_='c-jobs-list__location').text.split(',', 1)[1].strip()
         if 'sector' in location.lower():
             location = 'Bucuresti'
+        elif location == 'Targu Mures':
+            location = 'Targu-Mures'
         # AU CA SI "APLICA" LINK DE MAIL. INCERC SA IAU LINK-UL DE LA MAIL CU TOT CU SUBIECT
         link = job.find('div', class_ = 'c-jobs-list collapse').find('a')['href']
 
