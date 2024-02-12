@@ -22,8 +22,7 @@ def scraper():
         locatie_oras = job.find('div', attrs={'class': 'awsm-job-specification-item awsm-job-specification-locatie'})
         if locatie_oras:
             cities = locatie_oras.find_all('span', attrs={'class': 'awsm-job-specification-term'})
-            city_list = [city.text for city in cities]
-            city_job = ', '.join(city_list)                       # MANIPULEZ MAI MULTE ORASE INTR-UN SINGUR STRING
+            city_job = [city.text for city in cities]
 
         if city_job == 'Remote':
             city_job = ''
