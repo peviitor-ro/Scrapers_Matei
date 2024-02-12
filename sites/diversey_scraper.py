@@ -36,9 +36,7 @@ def prepare_post_request() -> tuple:
 def scraper():
 
     # scrape data from diversey scraper.
-
     url, headers, data = prepare_post_request()
-
     response = requests.post(url, headers=headers, json=data)
     json_response = response.json()
 
@@ -46,8 +44,12 @@ def scraper():
     for job in json_response['jobPostings']:
 
         get_location = job['locationsText']
-        orase = get_location.split('-')[1].strip()
-
+        if "-" in get_location:
+            orase = "Bucuresti"
+            get_remote = "on-site"
+        elif 'locations' in get_location.lower():
+            orase = "Bucuresti"
+            get_remote = "remote"
 
         # get jobs items from response
         job_list.append(Item(
@@ -57,8 +59,9 @@ def scraper():
             country = 'Romania',
             county = '',
             city = orase,
-            remote = '',
+            remote = get_remote,
         ).to_dict())
+
     return job_list
 
 
@@ -70,8 +73,8 @@ def main():
     jobs = scraper()
 
     # uncomment if your scraper done
-    UpdateAPI().update_jobs(company_name, jobs)
-    UpdateAPI().update_logo(company_name, logo_link)
+    # UpdateAPI().update_jobs(company_name, jobs)
+    # UpdateAPI().update_logo(company_name, logo_link)
 
 if __name__ == '__main__':
     main()
