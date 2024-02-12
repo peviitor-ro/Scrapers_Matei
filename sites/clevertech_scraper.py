@@ -1,6 +1,6 @@
 # Company ---> Clevertech
 # Link ------> https://clevertech.biz/jobs
-
+import requests
 from __utils import (
     GetStaticSoup,
     GetRequestJson,
@@ -9,39 +9,28 @@ from __utils import (
 )
 
 
-def get_id():
-
-    soup = GetStaticSoup('https://clevertech.biz/jobs')
-    script_tags = soup.find_all('script')
-    extracted_string = None
-
-    for script_tag in reversed(script_tags):
-        src = script_tag.get('src')
-        if src and "_next/static/" in src:
-            extracted_string = src.split("/")[3]
-            break
-
-    return extracted_string
-
 def scraper():
 
     # scrape data from clevertech scraper.
-    key = get_id()
-    json_data = GetRequestJson(f'https://clevertech.biz/_next/data/{key}/jobs/apply.json?applicationType=default')
+
     job_list = []
+    flag = 1
+    while flag < 3:
+        json_data = GetRequestJson(f'https://lumenalta.com/api/jobs?page={flag}&limit=10&name=')
 
-    for job in json_data['pageProps']['activeJobs']:
+        for job in json_data['data']:
 
-        # get jobs items from response
-        job_list.append(Item(
-            job_title = job['name'],
-            job_link = 'https://clevertech.biz/remote-jobs/' + job['slug'],
-            company = 'Clevertech',
-            country = 'Romania',
-            county = '',
-            city = '',
-            remote = 'remote',
-        ).to_dict())
+            # get jobs items from response
+            job_list.append(Item(
+                job_title = job['name'],
+                job_link = 'https://clevertech.biz/remote-jobs/' + job['slug'],
+                company = 'Clevertech',
+                country = 'Romania',
+                county = '',
+                city = '',
+                remote = 'remote',
+            ).to_dict())
+        flag += 1
 
     return job_list
 
