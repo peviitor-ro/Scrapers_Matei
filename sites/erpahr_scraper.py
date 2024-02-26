@@ -3,8 +3,6 @@
 
 from __utils import (
     GetStaticSoup,
-    get_county,
-    get_job_type,
     Item,
     UpdateAPI,
 )
@@ -14,7 +12,7 @@ def scraper():
 
     # scrape data from erpahr scraper.
 
-    soup = GetStaticSoup("https://erpahr.ro/cariere?filter=&search=&country=21&city=all&category=all")
+    soup = GetStaticSoup("https://erpahr.ro/cariere")
     job_list = []
     
     for job in soup.find_all('div', class_ = 'col-xs-12 col-md-6 col-lg-4 col-xl-3 mv-20'):
@@ -25,7 +23,7 @@ def scraper():
             if next_sibling:
                 locations_text = next_sibling.find_next_sibling('span', class_='pretitle').get_text(strip=True)
                 locations = locations_text.split(', ')
-                city = ', '.join(locations) if locations else ''
+                city = locations if locations else []
 
         # get jobs items from response
         job_list.append(Item(
