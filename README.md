@@ -12,7 +12,7 @@ This repository hosts a Python scraping utility that gathers job listings direct
 
 1. **Configuration**: Set up the necessary parameters, such as the URLs of company websites and the structure of job information you want to extract.
 2. **Scraping**: Run the script to initiate the scraping process, which will access the specified websites and extract job information.
-3. **Analysis and Storage**: Process and analyze the extracted data as needed, and store it in a relevant format such as databases or CSV files.
+3. **Analysis and Storage**: Process and analyze the extracted data as needed, and store it in a relevant format.
 
 ## Contributions 🤝
 
