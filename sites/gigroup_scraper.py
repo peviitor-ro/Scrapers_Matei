@@ -59,6 +59,7 @@ def scraper():
 
         for job in json_data.find_all('article', attrs={'class': 'workRow job-item-s'}):
 
+            title = job.find('div', attrs={'class': 'titleBlock'}).find('h2').text
             location_divs = job.find('div', attrs={'class': 'span8'}).find_all('div', attrs={'class': 'workCol2'})[1].find('h3').text.split(',')[0].strip()
             if '-' in location_divs:
                 location_clear = location_divs.split('-')[0].strip()
@@ -68,10 +69,16 @@ def scraper():
             if location_clear == 'Cluj':
                 location_clear = 'Cluj-Napoca'
             else: pass
+            if title == 'Director Sucursala':
+                location_clear = 'Mures'
+            if title == 'Tehnician de calitate':
+                location_clear = 'Pitesti'
+            if title == 'Operator turnatorie':
+                location_clear = 'Pitesti'
 
             # get jobs items from response
             job_list.append(Item(
-                job_title = job.find('div', attrs={'class': 'titleBlock'}).find('h2').text,
+                job_title = title,
                 job_link = job.find('div', attrs={'class': 'titleBlock'}).find('a').get('href'),
                 company = 'GiGroup',
                 country = 'Romania',
