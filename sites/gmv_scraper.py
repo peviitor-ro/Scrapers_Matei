@@ -15,9 +15,8 @@ import re
 def prepare_post_request():
 
     url = "https://eu-fra.api.csod.com/rec-job-search/external/jobs"
-
     token = get_token()
-
+    
     headers = {
         "authority": "eu-fra.api.csod.com",
         "accept": "application/json; q=1.0, text/*; q=0.8, */*; q=0.1",
@@ -71,6 +70,7 @@ def get_token():
 
     return token.strip()
 
+
 def scraper():
 
     # scrape data from gmv scraper.
@@ -114,6 +114,7 @@ def main():
     # uncomment if your scraper done
     UpdateAPI().update_jobs(company_name, jobs)
     UpdateAPI().update_logo(company_name, logo_link)
+
 
 if __name__ == '__main__':
     main()
