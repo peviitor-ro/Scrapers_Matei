@@ -21,6 +21,10 @@ def scraper():
     for job in soup.find_all('div', class_ = 'col-xl-6 col-lg-6 col-md-6 mb-3'):
 
         oras = str(job.find('div', class_ = 'location').text.strip())
+        if oras == 'Piatra Neamț':
+            oras = 'Piatra Neamt'
+        if oras == 'Târgu Mureș':
+            oras = 'Targu Mures'
 
         # get jobs items from response
         job_list.append(Item(
@@ -28,11 +32,11 @@ def scraper():
             job_link = job.find('a')['href'],
             company = 'MaxBet',
             country = 'Romania',
-            county = get_county(oras),
+            county = '',
             city = oras,
-            remote='',
+            remote = 'on-site',
         ).to_dict())
-
+    print(job_list)
     return job_list
 
 
