@@ -36,7 +36,7 @@ def scraper():
             city = oras,
             remote = 'on-site',
         ).to_dict())
-    print(job_list)
+
     return job_list
 
 
