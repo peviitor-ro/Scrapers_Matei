@@ -22,9 +22,9 @@ def scraper():
 
         oras = str(job.find('div', class_ = 'location').text.strip())
         if oras == 'Piatra Neamț':
-            oras = 'Piatra Neamt'
+            oras = 'Piatra-Neamt'
         if oras == 'Târgu Mureș':
-            oras = 'Targu Mures'
+            oras = 'Targu-Mures'
 
         # get jobs items from response
         job_list.append(Item(
