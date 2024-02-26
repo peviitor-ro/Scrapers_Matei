@@ -36,7 +36,7 @@ def scraper():
 
 def main():
 
-    company_name = "IGTSolutions"
+    company_name = "igt"
     logo_link = "https://www.igtsolutions.com/wp-content/uploads/2022/07/igt-solutions-logo.png"
 
     jobs = scraper()
