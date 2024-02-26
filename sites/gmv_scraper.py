@@ -88,7 +88,7 @@ def scraper():
             get_city = 'Bucuresti'
         if get_country == 'RO':
             get_country = 'Romania'
-        links = job['requisitionId']
+        links = f"https://gmv.csod.com/ux/ats/careersite/4/home/requisition/{job['requisitionId']}?c=gmv&lang=en-US"
 
         # get jobs items from response
         job_list.append(Item(
