@@ -56,7 +56,7 @@ def prepare_post_request():
         "customFieldRadios": []
     }
 
-    return  url, headers, data
+    return url, headers, data
 
 
 def get_token():
@@ -97,7 +97,7 @@ def scraper():
             country = get_country,
             county = get_county(get_city),
             city = get_city,
-            remote='',
+            remote = '',
         ).to_dict())
 
     return job_list
