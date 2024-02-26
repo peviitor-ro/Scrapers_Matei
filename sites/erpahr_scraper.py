@@ -26,6 +26,10 @@ def scraper():
                 if next_sibling:
                     locations_text = next_sibling.find_next_sibling('span', class_='pretitle').get_text(strip=True)
                     locations = locations_text.split(', ')
+                    if 'Prahova' in locations:
+                        locations.remove('Prahova')
+                    if 'Ilfov' in locations:
+                        locations.remove('Ilfov')
 
 
                 # get jobs items from response
