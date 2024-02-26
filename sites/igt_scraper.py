@@ -24,7 +24,7 @@ def scraper():
         job_list.append(Item(
             job_title= job.find('td', attrs = {'class': 'column-1'}).text,
             job_link = job.find('td', attrs = {'class': 'column-3'}).find('a')['href'],
-            company = 'IGTSolutions',
+            company = 'igt',
             country = 'Romania',
             county = '',
             city = '',
