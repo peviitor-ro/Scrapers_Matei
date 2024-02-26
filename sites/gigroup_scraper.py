@@ -70,7 +70,7 @@ def scraper():
                 location_clear = 'Cluj-Napoca'
             else: pass
             if title == 'Director Sucursala':
-                location_clear = 'Mures'
+                location_clear = 'Targu-Mures'
             if title == 'Tehnician de calitate':
                 location_clear = 'Pitești'
             if title == 'Operator turnatorie':
