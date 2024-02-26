@@ -16,9 +16,9 @@ def scraper():
     job_list = []
     
     for job in soup.find_all('div', class_ = 'col-xs-12 col-md-6 col-lg-4 col-xl-3 mv-20'):
-
+        city = []
         location_span = job.find('span', class_='pretitle')
-        if location_span:
+        if location_span == "ROMANIA":
             next_sibling = location_span.find_next_sibling('span', class_='pretitle_separator')
             if next_sibling:
                 locations_text = next_sibling.find_next_sibling('span', class_='pretitle').get_text(strip=True)
