@@ -27,16 +27,19 @@ def scraper():
                     locations_text = next_sibling.find_next_sibling('span', class_='pretitle').get_text(strip=True)
                     locations = locations_text.split(', ')
 
-        # get jobs items from response
-        job_list.append(Item(
-            job_title = job.find('div', class_ = 'career_name').find('h4').text,
-            job_link = 'https://erpahr.ro' + job.find('div', class_ = 'career_name').find('a')['href'],
-            company = 'ErpaHR',
-            country = 'Romania',
-            county = '',
-            city = locations,
-            remote = '',
-        ).to_dict())
+
+                # get jobs items from response
+                job_list.append(Item(
+                    job_title = job.find('div', class_ = 'career_name').find('h4').text,
+                    job_link = 'https://erpahr.ro' + job.find('div', class_ = 'career_name').find('a')['href'],
+                    company = 'ErpaHR',
+                    country = 'Romania',
+                    county = '',
+                    city = locations,
+                    remote = '',
+                ).to_dict())
+            else: pass
+
     return job_list
 
 
