@@ -88,11 +88,12 @@ def scraper():
             get_city = 'Bucuresti'
         if get_country == 'RO':
             get_country = 'Romania'
+        links = job['requisitionId']
 
         # get jobs items from response
         job_list.append(Item(
             job_title = job['displayJobTitle'],
-            job_link = f'https://example.com/jobs/{job['requisitionId']}',
+            job_link = links,
             company = 'Gmv',
             country = get_country,
             county = get_county(get_city),
