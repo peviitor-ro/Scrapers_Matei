@@ -16,7 +16,7 @@ This repository hosts a Python scraping utility that gathers job listings direct
 
 ## Contributions 🤝
 
-Contributions to this project are welcome! You can contribute by adding support for new company websites, improving scraping algorithms, or adding additional features.
+With precision and efficiency, they bring to the forefront job opportunities from various fields and regions of Romania, facilitating candidates' access to a promising professional future.
 
 ## License 📝
 
