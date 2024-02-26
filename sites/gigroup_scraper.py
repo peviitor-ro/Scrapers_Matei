@@ -72,9 +72,9 @@ def scraper():
             if title == 'Director Sucursala':
                 location_clear = 'Mures'
             if title == 'Tehnician de calitate':
-                location_clear = 'Pitesti'
+                location_clear = 'Pitești'
             if title == 'Operator turnatorie':
-                location_clear = 'Pitesti'
+                location_clear = 'Pitești'
 
             # get jobs items from response
             job_list.append(Item(
