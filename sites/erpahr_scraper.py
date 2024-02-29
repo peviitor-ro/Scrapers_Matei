@@ -40,7 +40,7 @@ def scraper():
                     country = 'Romania',
                     county = '',
                     city = locations,
-                    remote = '',
+                    remote = 'on-site',
                 ).to_dict())
             else: pass
 
