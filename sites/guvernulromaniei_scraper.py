@@ -7,7 +7,6 @@ from __utils import (
     UpdateAPI,
 )
 
-
 def scraper():
 
     # scrape data from guvernulromaniei scraper.
@@ -15,13 +14,19 @@ def scraper():
     job_list = []
     base_url = "https://posturi.gov.ro/page/"
 
-    for page_number in range(1, 28):
+    #determine last page number to fetch
+    soup = GetStaticSoup(base_url)
+    span_tag = soup.find('span', class_='page-numbers dots')
+    a_tag = span_tag.find_next_sibling('a', class_='page-numbers')
+    max_page = int(a_tag.text)
+
+    for page_number in range(max_page, 1, -1):
         url = base_url + str(page_number)
         soup = GetStaticSoup(url)
-    
-        for job in soup.find_all('article', class_ = 'box'):
 
+        for job in soup.find_all('article', class_ = 'box'):
             location = job.find('div', class_ = 'locatie').text.strip()
+            angajator_text = job.find('div', class_='angajator').text.strip()
 
             # get jobs items from response
             job_list.append(Item(
@@ -29,8 +34,10 @@ def scraper():
                 job_link = job.find('div', class_ = 'title').find('a')['href'],
                 company = 'GuvernulRomaniei',
                 country = 'Romania',
-                county = '',
-                city = location,
+                county = location,
+                city = '', #TODO: match angajator text with city from county, ex:
+                #"LICEUL TEHNOLOGIC DUILIU ZAMFIRESCU DRAGALINA ,DRAGALINA,  JUD. CĂLĂRAȘI" -> Dragalina
+                #and default to county seat if no match found
                 remote = 'on-site' if location else 'remote',
             ).to_dict())
 
