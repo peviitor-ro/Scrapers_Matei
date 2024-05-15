@@ -7,6 +7,9 @@ from __utils import (
     UpdateAPI,
 )
 
+from __utils.found_county import find_cities_from_county_in_string, remove_diacritics, find_best_city_match
+
+
 def scraper():
 
     # scrape data from guvernulromaniei scraper.
@@ -25,7 +28,7 @@ def scraper():
         soup = GetStaticSoup(url)
 
         for job in soup.find_all('article', class_ = 'box'):
-            location = job.find('div', class_ = 'locatie').text.strip()
+            county = remove_diacritics(job.find('div', class_ = 'locatie').text.strip())
             angajator_text = job.find('div', class_='angajator').text.strip()
 
             # get jobs items from response
@@ -34,11 +37,9 @@ def scraper():
                 job_link = job.find('div', class_ = 'title').find('a')['href'],
                 company = 'GuvernulRomaniei',
                 country = 'Romania',
-                county = location,
-                city = '', #TODO: match angajator text with city from county, ex:
-                #"LICEUL TEHNOLOGIC DUILIU ZAMFIRESCU DRAGALINA ,DRAGALINA,  JUD. CĂLĂRAȘI" -> Dragalina
-                #and default to county seat if no match found
-                remote = 'on-site' if location else 'remote',
+                county = county,
+                city = find_best_city_match(county, find_cities_from_county_in_string(county, remove_diacritics(angajator_text).lower())), #WARNING, not perfect, depends on city name being present in short job description, which most are, but not all, eg: https://posturi.gov.ro/anunt/ingrijitor-1486/ Alternative would be to open job page itself and try to find city from there.. too complicated for me
+                remote = 'on-site' if county else 'remote',
             ).to_dict())
 
     return job_list
