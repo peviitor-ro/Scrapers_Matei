@@ -1,6 +1,3 @@
-# Company ---> GuvernulRomaniei
-# Link ------> https://posturi.gov.ro/
-
 from __utils import (
     GetStaticSoup,
     Item,
@@ -13,27 +10,30 @@ def scraper():
     # scrape data from guvernulromaniei scraper.
 
     job_list = []
-    base_url = "https://posturi.gov.ro/page/"
+    url = "https://posturi.gov.ro/page/1"
+    index = 0
 
-    for page_number in range(1, 28):
-        url = base_url + str(page_number)
+    while index < 48:
         soup = GetStaticSoup(url)
-    
-        for job in soup.find_all('article', class_ = 'box'):
+        for job in soup.find_all('article', class_='box'):
 
-            location = job.find('div', class_ = 'locatie').text.strip()
+            location = job.find('div', class_='locatie').text.strip()
 
             # get jobs items from response
             job_list.append(Item(
-                job_title = job.find('div', class_ = 'title').find('a').text.strip(),
-                job_link = job.find('div', class_ = 'title').find('a')['href'],
-                company = 'GuvernulRomaniei',
-                country = 'Romania',
-                county = '',
-                city = location,
-                remote = 'on-site' if location else 'remote',
+                job_title=job.find('div', class_='title').find('a').text.strip(),
+                job_link=job.find('div', class_='title').find('a')['href'],
+                company='GuvernulRomaniei',
+                country='Romania',
+                county='',
+                city=location,
+                remote='on-site' if location else 'remote',
             ).to_dict())
 
+        index += 1
+        url = f"https://posturi.gov.ro/page/{index + 1}"
+    print(len(job_list))
+    print(job_list[-1])
     return job_list
 
 
@@ -44,9 +44,8 @@ def main():
 
     jobs = scraper()
 
-    # uncomment if your scraper done
-    UpdateAPI().update_jobs(company_name, jobs)
-    UpdateAPI().update_logo(company_name, logo_link)
+    # UpdateAPI().update_jobs(company_name, jobs)
+    # UpdateAPI().update_logo(company_name, logo_link)
 
 
 if __name__ == '__main__':
