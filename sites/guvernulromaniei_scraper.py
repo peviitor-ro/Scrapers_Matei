@@ -10,10 +10,10 @@ def scraper():
     # scrape data from guvernulromaniei scraper.
 
     job_list = []
-    url = "https://posturi.gov.ro/page/1"
+    url = "https://posturi.gov.ro"
     index = 0
 
-    while index < 48:
+    while index < 49:
         soup = GetStaticSoup(url)
         for job in soup.find_all('article', class_='box'):
 
@@ -21,17 +21,16 @@ def scraper():
 
             # get jobs items from response
             job_list.append(Item(
-                job_title = job.find('div', class_='title').find('a').text.strip(),
-                job_link = job.find('div', class_='title').find('a')['href'],
-                company = 'GuvernulRomaniei',
-                country = 'Romania',
-                county = location,
-                city = '',
-                remote = 'on-site' if location else 'remote',
+                job_title=job.find('div', class_='title').find('a').text.strip(),
+                job_link=job.find('div', class_='title').find('a')['href'],
+                company='GuvernulRomaniei',
+                country='Romania',
+                county='',
+                city=location,
+                remote='on-site' if location else 'remote',
             ).to_dict())
-
         index += 1
-        url = f"https://posturi.gov.ro/page/{index + 1}"
+        url = f'https://posturi.gov.ro/page/{index}'
 
     return job_list
 
