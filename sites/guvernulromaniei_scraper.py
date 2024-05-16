@@ -12,13 +12,15 @@ def scraper():
     job_list = []
     url = "https://posturi.gov.ro"
     index = 1
+    soup = GetStaticSoup(url)
+    for job in soup.find_all('div', class_='nav-links'):
+        pagina = int(job.find('a').findNext('a').text)
 
-    while index <= 48:
+    while index <= pagina:
         soup = GetStaticSoup(url)
         for job in soup.find_all('article', class_='box'):
 
             location = job.find('div', class_='locatie').text.strip()
-
             # get jobs items from response
             job_list.append(Item(
                 job_title=job.find('div', class_='title').find('a').text.strip(),
@@ -31,7 +33,7 @@ def scraper():
             ).to_dict())
         index += 1
         url = f'https://posturi.gov.ro/page/{index}'
-        print(len(job_list))
+    print(len(job_list))
     print(job_list[-1])
     print(len(job_list))
     return job_list
