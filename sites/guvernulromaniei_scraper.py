@@ -21,13 +21,13 @@ def scraper():
 
             # get jobs items from response
             job_list.append(Item(
-                job_title=job.find('div', class_='title').find('a').text.strip(),
-                job_link=job.find('div', class_='title').find('a')['href'],
-                company='GuvernulRomaniei',
-                country='Romania',
-                county='',
-                city=location,
-                remote='on-site' if location else 'remote',
+                job_title = job.find('div', class_='title').find('a').text.strip(),
+                job_link = job.find('div', class_='title').find('a')['href'],
+                company = 'GuvernulRomaniei',
+                country = 'Romania',
+                county = location,
+                city = '',
+                remote = 'on-site' if location else 'remote',
             ).to_dict())
 
         index += 1
