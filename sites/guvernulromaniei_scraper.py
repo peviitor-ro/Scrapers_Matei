@@ -11,9 +11,9 @@ def scraper():
 
     job_list = []
     url = "https://posturi.gov.ro"
-    index = 0
+    index = 1
 
-    while index < 49:
+    while index <= 48:
         soup = GetStaticSoup(url)
         for job in soup.find_all('article', class_='box'):
 
@@ -31,7 +31,9 @@ def scraper():
             ).to_dict())
         index += 1
         url = f'https://posturi.gov.ro/page/{index}'
-
+        print(len(job_list))
+    print(job_list[-1])
+    print(len(job_list))
     return job_list
 
 
@@ -42,8 +44,8 @@ def main():
 
     jobs = scraper()
 
-    UpdateAPI().update_jobs(company_name, jobs)
-    UpdateAPI().update_logo(company_name, logo_link)
+    # UpdateAPI().update_jobs(company_name, jobs)
+    # UpdateAPI().update_logo(company_name, logo_link)
 
 
 if __name__ == '__main__':
