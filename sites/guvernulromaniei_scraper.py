@@ -32,8 +32,7 @@ def scraper():
 
         index += 1
         url = f"https://posturi.gov.ro/page/{index + 1}"
-    print(len(job_list))
-    print(job_list[-1])
+
     return job_list
 
 
@@ -44,8 +43,8 @@ def main():
 
     jobs = scraper()
 
-    # UpdateAPI().update_jobs(company_name, jobs)
-    # UpdateAPI().update_logo(company_name, logo_link)
+    UpdateAPI().update_jobs(company_name, jobs)
+    UpdateAPI().update_logo(company_name, logo_link)
 
 
 if __name__ == '__main__':
