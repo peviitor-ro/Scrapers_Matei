@@ -33,9 +33,7 @@ def scraper():
             ).to_dict())
         index += 1
         url = f'https://posturi.gov.ro/page/{index}'
-    print(len(job_list))
-    print(job_list[-1])
-    print(len(job_list))
+
     return job_list
 
 
