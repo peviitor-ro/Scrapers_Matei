@@ -1,12 +1,57 @@
 # Company ---> Auto1 Group
 # Link ------> https://www.auto1-group.com/en/jobs/?country=Romania
 
+import json
+from html import unescape
+
 from __utils import (
     GetRequestJson,
+    GetStaticSoup,
     Item,
     UpdateAPI,
     get_county,
 )
+
+
+def _extract_jobs(json_data):
+
+    jobs_data = json_data.get('jobs', {})
+    hits = jobs_data.get('hits', [])
+
+    if isinstance(hits, dict):
+        return hits.get('hits', [])
+
+    return hits
+
+
+def _get_jobs_from_page():
+
+    soup = GetStaticSoup('https://www.auto1-group.com/en/jobs/?country=Romania')
+    jobs_node = soup.select_one('#smart-recruiters-job-data')
+
+    if not jobs_node:
+        return []
+
+    jobs_json = jobs_node.get('data-initial-jobs', '')
+    if not jobs_json:
+        return []
+
+    json_data = json.loads(unescape(jobs_json))
+
+    return [
+        job for job in _extract_jobs(json_data)
+        if job.get('_source', {}).get('locationCountry') == 'Romania'
+    ]
+
+
+def _normalize_city(job_source):
+
+    town = job_source.get('translatedCity') or job_source.get('locationCity') or ''
+
+    if town in ('Bucharest', 'București'):
+        return 'Bucuresti'
+
+    return town
 
 
 def scraper():
@@ -15,27 +60,35 @@ def scraper():
     page = 1
     job_list = []
 
-    while page <= 3:
+    while True:
 
         json_data = GetRequestJson(f"https://www.auto1-group.com/smart-recruiters/jobs/search/?page={page}&country=Romania")
-        jobs = json_data['jobs']['hits']['hits']
+
+        if not isinstance(json_data, dict):
+            jobs = _get_jobs_from_page()
+        else:
+            jobs = _extract_jobs(json_data)
+
+        if not jobs:
+            break
 
         for job in jobs:
-            town = job['_source']['locationCity']
-
-            if town == 'Bucharest':
-                town = 'Bucuresti'
+            source = job.get('_source', {})
+            town = _normalize_city(source)
 
             # get jobs items from response
             job_list.append(Item(
-                job_title = job['_source']['title'],
-                job_link = f'https://www.auto1-group.com/en/jobs/{job["_source"]["url"]}',
+                job_title = source['title'],
+                job_link = f'https://www.auto1-group.com/en/jobs/{source["url"]}',
                 company = 'auto1',
                 country = 'Romania',
                 county = get_county(town),
                 city = town,
-                remote = 'on-site',
+                remote = 'remote' if source.get('remote') else 'on-site',
             ).to_dict())
+
+        if not isinstance(json_data, dict):
+            break
 
         page = page + 1
 

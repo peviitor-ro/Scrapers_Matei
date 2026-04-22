@@ -22,35 +22,35 @@ class UpdateAPI:
     '''
 
     def __init__(self):
-        self.api_key = os.environ.get('API_KEY')
-        self.clean_url = 'https://api.peviitor.ro/v4/clean/'
-        self.post_url = 'https://api.peviitor.ro/v4/update/'
+        self.post_url = 'https://api.laurentiumarian.ro/jobs/add/'
         self.logo_url = 'https://api.peviitor.ro/v1/logo/add/'
-
-        self.clean_header = {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'apikey': self.api_key
-        }
 
         self.post_header = {
             'Content-Type': 'application/json',
-            'apikey': self.api_key
+            'Authorization': f'Bearer {self.get_token()}',
         }
 
         self.logo_header = {
             'Content-Type': 'application/json',
         }
 
+    def get_token(self):
+        token_endpoint = 'https://api.laurentiumarian.ro/get_token'
+        email = os.environ.get('API_KEY')
+
+        token = requests.post(token_endpoint, json={
+            "email": email
+        }, headers={
+            "Content-Type": "application/json",
+        })
+
+        return token.json()['access']
+
     def update_jobs(self, company_name: str, data_jobs: list):
         '''
         ... update and clean data on peviitor
 
         '''
-        clean_request = requests.post(self.clean_url, headers=self.clean_header,
-                                      data={'company': company_name})
-
-        # time sleep for SOLR indexing
-        time.sleep(0.2)
 
         post_request_to_server = requests.post(self.post_url, headers=self.post_header,
                                                data=json.dumps(data_jobs))
@@ -63,6 +63,10 @@ class UpdateAPI:
         #######################################################################
 
         print(json.dumps(data_jobs, indent=4))
+        if post_request_to_server.status_code == 200:
+            print(f'Update ---> succesfuly added {len(data_jobs)} jobs')
+        else:
+            print(f'Update ---> failed {post_request_to_server}')
 
     def update_logo(self, id_company: str, logo_link: str):
         '''
@@ -70,6 +74,7 @@ class UpdateAPI:
         '''
 
         data = json.dumps([{"id": id_company, "logo": logo_link}])
-        response = requests.post(self.logo_url, headers=self.logo_header, data=data)
+        response = requests.post(
+            self.logo_url, headers=self.logo_header, data=data)
 
         #  print(f'Logo update ---> succesfuly {response}')

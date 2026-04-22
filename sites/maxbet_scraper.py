@@ -5,7 +5,6 @@
 from __utils import (
     GetStaticSoup,
     get_county,
-    get_job_type,
     Item,
     UpdateAPI,
 )
@@ -32,7 +31,7 @@ def scraper():
             job_link = job.find('a')['href'],
             company = 'MaxBet',
             country = 'Romania',
-            county = '',
+            county = get_county(oras),
             city = oras,
             remote = 'on-site',
         ).to_dict())

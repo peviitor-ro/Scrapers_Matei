@@ -26,9 +26,9 @@ def scraper():
 
         # get jobs items from response
         job_list.append(Item(
-            job_title = job.find('span').text,
+            job_title = job.find('a').text.strip(),
             job_link = job.find('a')['href'],
-            company = 'Partnerd',
+            company='Partnerd Scraper',
             country = 'Romania',
             county = get_county('Bucuresti'),
             city = 'Bucuresti',
@@ -40,7 +40,7 @@ def scraper():
 
 def main():
 
-    company_name = "Partnerd"
+    company_name = "Partnerd Scraper"
     logo_link = "https://uploads-ssl.webflow.com/61070548cd02cbe9343b5101/61070d5df465e95e28ce7183_Partnerd%20PNG%20Logo-p-500.png"
 
     jobs = scraper()

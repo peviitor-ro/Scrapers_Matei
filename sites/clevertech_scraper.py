@@ -1,8 +1,6 @@
 # Company ---> Clevertech
 # Link ------> https://clevertech.biz/jobs
-import requests
 from __utils import (
-    GetStaticSoup,
     GetRequestJson,
     Item,
     UpdateAPI,

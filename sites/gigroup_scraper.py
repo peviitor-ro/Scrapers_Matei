@@ -9,83 +9,56 @@ from __utils import (
 )
 
 
-def prepare_post_request() -> tuple:
+def _normalize_city(title: str, city: str) -> str:
 
-    # prepare post request for GiGroup.
+    if '-' in city:
+        city = city.split('-')[0].strip()
 
-    url = 'https://ro.gigroup.com/wp-content/themes/gi-group-child/job-search-infinite-scroll_ALL.php?fbclid=IwAR3Av5LpQV66NPEgVKJA7lVOO2JcW9ibjrRCvSa2UT5AX0rhBldAwOiptFE'
+    if city == 'Cluj':
+        city = 'Cluj-Napoca'
 
-    headers = {
-        'Accept': '*/*',
-        'Connection': 'keep-alive',
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        'Origin': 'https://ro.gigroup.com',
-        'Referer': 'https://ro.gigroup.com/oferta-noastra-de-locuri-de-munca',
-        'Sec-Fetch-Site': 'same-origin',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'X-Requested-With': 'XMLHttpRequest',
-    }
+    if title == 'Director Sucursala':
+        return 'Targu-Mures'
 
-    return url, headers
+    if title in ('Tehnician de calitate', 'Operator turnatorie'):
+        return 'Pitești'
+
+    return city
 
 
 def scraper():
 
     # scrape data from GiGroup scraper.
-    url, headers = prepare_post_request()
-    session = requests.Session()
+    response = requests.get('https://ro.gigroup.com/oferta-noastra-de-locuri-de-munca/', timeout=30)
+    soup = BeautifulSoup(response.text, 'html.parser')
 
     # list with data
     job_list = []
-    offset = 0
-    flag = True
 
-    while flag:
-        response = session.post(url=url, headers=headers, data={
-                "X_GUMM_REQUESTED_WITH": "XMLHttpRequest",
-                "action": "scrollpagination",
-                "numberLimit": "30",
-                "offset": offset
-            })
+    for job in soup.select('article.workRow'):
+        title_block = job.select_one('div.titleBlock a')
+        if not title_block:
+            continue
 
-        # get data and add to offset
-        json_data = BeautifulSoup(response.text, 'html.parser')
-        data = len(json_data.find_all('article'))
-        if data > 0:
-            offset += 30
-        else:
-            flag = False
-        # end
+        title = title_block.get_text(strip=True)
+        location_nodes = job.select('div.span8 div.workCol2 h3')
 
-        for job in json_data.find_all('article', attrs={'class': 'workRow job-item-s'}):
+        if len(location_nodes) < 2:
+            continue
 
-            title = job.find('div', attrs={'class': 'titleBlock'}).find('h2').text
-            location_divs = job.find('div', attrs={'class': 'span8'}).find_all('div', attrs={'class': 'workCol2'})[1].find('h3').text.split(',')[0].strip()
-            if '-' in location_divs:
-                location_clear = location_divs.split('-')[0].strip()
-            else:
-                location_clear = location_divs
+        location_text = location_nodes[1].get_text(strip=True).split(',')[0].strip()
+        location_clear = _normalize_city(title, location_text)
 
-            if location_clear == 'Cluj':
-                location_clear = 'Cluj-Napoca'
-            else: pass
-            if title == 'Director Sucursala':
-                location_clear = 'Targu-Mures'
-            if title == 'Tehnician de calitate':
-                location_clear = 'Pitești'
-            if title == 'Operator turnatorie':
-                location_clear = 'Pitești'
-
-            # get jobs items from response
-            job_list.append(Item(
-                job_title = title,
-                job_link = job.find('div', attrs={'class': 'titleBlock'}).find('a').get('href'),
-                company = 'GiGroup',
-                country = 'Romania',
-                county = get_county(location_clear),
-                city = location_clear,
-                remote = 'on-site',
-            ).to_dict())
+        # get jobs items from response
+        job_list.append(Item(
+            job_title = title,
+            job_link = title_block.get('href'),
+            company = 'GiGroup',
+            country = 'Romania',
+            county = get_county(location_clear),
+            city = location_clear,
+            remote = 'on-site',
+        ).to_dict())
 
 
     return job_list

@@ -4,7 +4,6 @@
 from __utils import (
     GetStaticSoup,
     get_county,
-    get_job_type,
     Item,
     UpdateAPI,
 )
@@ -27,13 +26,19 @@ def scraper():
         else:
             city = 'Pogoanele'
 
+        if type(city) == list:
+            county = [get_county(c) for c in city]
+        else:
+            county = get_county(city)
+
+
         # get jobs items from response
         job_list.append(Item(
             job_title = title,
             job_link = job.find('a')['href'],
             company= 'Ados',
             country = 'Romania',
-            county = '',
+            county = county,
             city = city,
             remote = 'on-site',
         ).to_dict())

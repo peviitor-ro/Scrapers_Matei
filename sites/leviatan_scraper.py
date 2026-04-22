@@ -5,7 +5,6 @@
 from __utils import (
     GetStaticSoup,
     get_county,
-    get_job_type,
     Item,
     UpdateAPI,
 )
@@ -17,21 +16,26 @@ def scraper():
 
     soup = GetStaticSoup("https://leviatan.ro/cariere/")
     job_list = []
-    
-    for job in soup.find_all('div', class_ = 'row max_width no-padding'):
 
-        all_links = job.find_all('a')
-        last_link = all_links[-1] if all_links else None
-        last_href = last_link.get('href')
+    # Leviatan does not expose job locations in the careers cards.
+    # The company contact page lists the HQ in Splaiul Unirii 165, Sector 3, Bucuresti.
+    city = 'Bucuresti'
+    county = get_county(city)
+
+    for job in soup.select('.blog-posts .blog-item .heading.title a.-unlink'):
+        job_href = job.get('href')
+
+        if not job_href or '/category/' in job_href:
+            continue
 
         # get jobs items from response
         job_list.append(Item(
-            job_title = job.find('h4').text.strip(),
-            job_link = last_href,
+            job_title = job.text.strip(),
+            job_link = job_href,
             company = 'Leviatan',
             country = 'Romania',
-            county = '',
-            city = '',
+            county = county,
+            city = city,
             remote = '',
         ).to_dict())
 

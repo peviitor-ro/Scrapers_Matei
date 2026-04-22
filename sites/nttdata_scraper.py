@@ -42,7 +42,7 @@ def scraper():
                 job_link = link,
                 company = 'NTTData',
                 country = 'Romania',
-                county = '',
+                county = [get_county(loc) for loc in location_list],
                 city = location_list,
                 remote = '',
             ).to_dict())

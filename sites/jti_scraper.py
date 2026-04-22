@@ -9,35 +9,58 @@ from __utils import (
 )
 
 
+def _translate_city(city: str) -> str:
+
+    city_map = {
+        'BUCHAREST': 'Bucuresti',
+    }
+
+    city = city.strip().upper()
+
+    if city in city_map:
+        return city_map[city]
+
+    return city.title()
+
+
 def scraper():
 
     # scrape data from jti scraper.
-    url = "https://jobs.jti.com/search/?q=&sortColumn=referencedate&sortDirection=desc&optionsFacetsDD_country=RO"
+    base_url = "https://jobs.jti.com/search/?q=&sortColumn=referencedate&sortDirection=desc&optionsFacetsDD_country=RO&locale=ro_RO"
     page_number = 0
     job_list = []
-    while page_number <= 25:
+    while True:
+        url = f"{base_url}&startrow={page_number}" if page_number else base_url
         soup = GetStaticSoup(url)
+        jobs = soup.select('table#searchresults tbody tr.data-row')
 
-        for job in soup.find_all('div', 'jobdetail-phone visible-phone'):
-            span_elements = job.find_all('span')
+        if not jobs:
+            break
 
-            if len(span_elements) >= 4:
-                get_city = span_elements[3].text
-                if get_city == 'Bucharest':
-                    get_city = 'Bucuresti'
+        for job in jobs:
+            title_link = job.select_one('a.jobTitle-link')
+            location = job.select_one('span.jobLocation')
 
-                # get jobs items from response
+            if not title_link or not location:
+                continue
+
+            get_city = _translate_city(location.get_text(strip=True).split(',')[0])
+
             job_list.append(Item(
-                job_title = job.find('a').text.strip(),
-                job_link = 'https://jobs.jti.com' + str(job.find('a')['href']),
+                job_title = title_link.text.strip(),
+                job_link = 'https://jobs.jti.com' + str(title_link['href']),
                 company = 'jti',
-                country = job.find('span', class_ = 'jobShifttype visible-phone').text.strip(),
-                county = '',
+                country = 'Romania',
+                county = get_county(get_city),
                 city = get_city,
                 remote = '',
             ).to_dict())
+
+        if len(jobs) < 25:
+            break
+
         page_number += 25
-        url = f"{url}&startrow={page_number}"
+
     return job_list
 
 

@@ -3,8 +3,6 @@
 
 from __utils import (
     GetStaticSoup,
-    get_county,
-    get_job_type,
     Item,
     UpdateAPI,
 )
@@ -25,11 +23,13 @@ def scraper():
         link_soup = GetStaticSoup(get_link)
         job_type = link_soup.find('div', attrs = {'id': 'comp-lo4aysd24'}).text.strip()
         get_city = job.find('p', class_ = 'font_8 wixui-rich-text__text').text.split(',')[0].strip()
+        county = ''
 
         if get_city == "Romania":
             get_city = ''
         elif get_city == "Bucharest":
             get_city = 'Bucuresti'
+            county = 'Bucuresti'
         else: pass
 
         # get jobs items from response
@@ -38,7 +38,7 @@ def scraper():
             job_link = url,
             company= 'Boost-upHr',
             country = 'Romania',
-            county = get_county(get_city),
+            county = county,
             city = get_city,
             remote = job_type,
         ).to_dict())

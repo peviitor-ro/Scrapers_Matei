@@ -46,21 +46,34 @@ def scraper():
 
     # scrape data from masabi scraper.
     url, headers, data = prepare_post_request()
-    response = requests.post(url, headers=headers, json=data)
+    response = requests.post(url, headers=headers, json=data, timeout=30)
     json_data = response.json()
 
     job_list = []
     for job in json_data['data']['jobBoard']['jobPostings']:
         cluj_found = False
         bucharest_found = False
-        for secondary_location in job['secondaryLocations']:
+
+        if job.get('locationName') == 'Romania':
+            job_list.append(Item(
+                job_title = job['title'],
+                job_link = f"https://jobs.ashbyhq.com/masabi/{job['id']}",
+                company = 'Masabi',
+                country = 'Romania',
+                county = get_county('Bucuresti'),
+                city = 'Bucuresti',
+                remote = 'Remote',
+            ).to_dict())
+            continue
+
+        for secondary_location in job.get('secondaryLocations', []):
             location_name = secondary_location['locationName']
 
             if location_name == 'Cluj' and not cluj_found:
                 location_name = 'Cluj-Napoca'
                 job_list.append(Item(
                     job_title = job['title'],
-                    job_link = f'https://careers.masabi.com/masabi-jobs/?ashby_jid={job['id']}',
+                    job_link = f"https://jobs.ashbyhq.com/masabi/{job['id']}",
                     company = 'Masabi',
                     country = 'Romania',
                     county = get_county(location_name),
@@ -73,7 +86,7 @@ def scraper():
                 location_name = 'Bucuresti'
                 job_list.append(Item(
                     job_title = job['title'],
-                    job_link = f'https://careers.masabi.com/masabi-jobs/?ashby_jid={job['id']}',
+                    job_link = f"https://jobs.ashbyhq.com/masabi/{job['id']}",
                     company = 'Masabi',
                     country = 'Romania',
                     county = get_county(location_name),

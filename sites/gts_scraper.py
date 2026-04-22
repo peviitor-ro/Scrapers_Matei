@@ -4,10 +4,24 @@
 from __utils import (
     GetStaticSoup,
     get_county,
-    get_job_type,
     Item,
     UpdateAPI,
 )
+
+
+def _normalize_city(city: str) -> str:
+
+    city = city.strip()
+
+    try:
+        city = city.encode('latin1').decode('utf-8')
+    except (UnicodeEncodeError, UnicodeDecodeError):
+        pass
+
+    if city == 'București':
+        return 'Bucuresti'
+
+    return city
 
 
 def scraper():
@@ -18,17 +32,16 @@ def scraper():
     job_list = []
 
     for job in soup.find_all('tr')[1:]:
-        get_city = job.find('td', class_='views-field-field-city').text.strip()
-        if get_city == 'Bucure\u00c8\u0099ti':
-            get_city = 'Bucuresti'
+        get_city = _normalize_city(job.find('td', class_='views-field-field-city').text)
+        job_href = job.find('a')['href']
 
         # get jobs items from response
         job_list.append(Item(
             job_title = job.find('td', class_='views-field-title').text.strip(),
-            job_link = f'https://www.gts.ro/ro{job.find('a')['href']}',
+            job_link = f'https://www.gts.ro{job_href}',
             company = 'gts',
             country= 'Romania',
-            county = '',
+            county = get_county(get_city),
             city = get_city,
             remote='',
         ).to_dict())

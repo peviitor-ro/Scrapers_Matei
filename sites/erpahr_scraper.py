@@ -5,6 +5,7 @@ from __utils import (
     GetStaticSoup,
     Item,
     UpdateAPI,
+    get_county,
 )
 
 
@@ -31,14 +32,14 @@ def scraper():
                     if 'Ilfov' in locations:
                         locations.remove('Ilfov')
 
-
+                    county = [get_county(loc) for loc in locations]
                 # get jobs items from response
                 job_list.append(Item(
                     job_title = job.find('div', class_ = 'career_name').find('h4').text,
                     job_link = 'https://erpahr.ro' + job.find('div', class_ = 'career_name').find('a')['href'],
                     company = 'ErpaHR',
                     country = 'Romania',
-                    county = '',
+                    county = county,
                     city = locations,
                     remote = 'on-site',
                 ).to_dict())

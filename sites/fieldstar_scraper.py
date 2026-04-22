@@ -1,10 +1,10 @@
 # Company ---> FieldStar
-# Link ------> https://www.fieldstar.ro/jobs/
+# Link ------> https://fieldstar.mingle.ro/ro/apply
+
+import requests
 
 from __utils import (
-    GetStaticSoup,
     get_county,
-    get_job_type,
     Item,
     UpdateAPI,
 )
@@ -14,33 +14,45 @@ def scraper():
 
     # scrape data from FieldStar scraper.
 
-    soup = GetStaticSoup("https://www.fieldstar.ro/jobs/")
     job_list = []
+    page = 0
 
-    for job in soup.find_all('div', attrs = {'class': 'awsm-job-listing-item awsm-grid-item'}):
+    while True:
+        response = requests.get(
+            'https://mingle.ro/api/boards/careers-page/jobs',
+            params={
+                'company': 'fieldstar',
+                'page': page,
+                'pageSize': 100,
+            },
+            timeout=30,
+        )
+        json_data = response.json().get('data', {})
+        jobs = json_data.get('results', [])
 
-        locatie_oras = job.find('div', attrs={'class': 'awsm-job-specification-item awsm-job-specification-locatie'})
-        if locatie_oras:
-            cities = locatie_oras.find_all('span', attrs={'class': 'awsm-job-specification-term'})
-            city_job = [city.text.replace('Cluj', 'Cluj-Napoca') for city in cities]
+        if not jobs:
+            break
 
+        for job in jobs:
+            locations = [location.get('label', '').strip() for location in job.get('locations', []) if location.get('label')]
+            city_job = [city.replace('Cluj', 'Cluj-Napoca') for city in locations]
+            county_job = [get_county(city) for city in city_job]
 
-            if "Remote" in city_job:
-                city_job = ''
-                remote = 'remote'                                     # ADD REMOTE MANUAL, PT CA PE SITE
-            else:                                                          # LA CITY E SCRIS REMOTE
-                remote = 'on-site'
+            # get jobs items from response
+            job_list.append(Item(
+                job_title = job['title'],
+                job_link = f'https://fieldstar.mingle.ro/ro/apply/{job["uid"]}',
+                company = 'FieldStar',
+                country = 'Romania',
+                county = county_job,
+                city = city_job,
+                remote = 'on-site',
+            ).to_dict())
 
-        # get jobs items from response
-        job_list.append(Item(
-            job_title = job.find('div', attrs = {'class': 'awsm-grid-left-col'}).text.strip(),
-            job_link = job.find('a')['href'],
-            company = 'FieldStar',
-            country = 'Romania',
-            county = '',
-            city = city_job,
-            remote = get_job_type(remote),
-        ).to_dict())
+        if not json_data.get('pagination', {}).get('hasNext'):
+            break
+
+        page += 1
 
     return job_list
 

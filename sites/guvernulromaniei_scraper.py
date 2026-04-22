@@ -2,6 +2,7 @@ from __utils import (
     GetStaticSoup,
     Item,
     UpdateAPI,
+    get_county
 )
 
 
@@ -27,7 +28,7 @@ def scraper():
                 job_link=job.find('div', class_='title').find('a')['href'],
                 company='GuvernulRomaniei',
                 country='Romania',
-                county='',
+                county=get_county(location),
                 city=location,
                 remote='on-site' if location else 'remote',
             ).to_dict())
@@ -44,8 +45,8 @@ def main():
 
     jobs = scraper()
 
-    # UpdateAPI().update_jobs(company_name, jobs)
-    # UpdateAPI().update_logo(company_name, logo_link)
+    UpdateAPI().update_jobs(company_name, jobs)
+    UpdateAPI().update_logo(company_name, logo_link)
 
 
 if __name__ == '__main__':

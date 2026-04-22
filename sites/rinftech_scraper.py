@@ -1,10 +1,9 @@
 # Company ---> rinftech
-# Link ------> https://jobs.rinf.tech/jobs/Careers
+# Link ------> https://jobs.rinf.tech
 
 from __utils import (
-    GetDynamicSoup,
+    GetStaticSoup,
     get_county,
-    get_job_type,
     Item,
     UpdateAPI,
 )
@@ -14,30 +13,74 @@ def scraper():
 
     # scrape data from rinftech scraper.
 
-    soup = GetDynamicSoup("https://jobs.rinf.tech/jobs/careers")
     job_list = []
 
-    for job in soup.find_all('div', class_='cw-filter-joblist'):
+    city_map = {
+        'Bucharest': 'Bucuresti',
+        'Cluj-Napoca': 'Cluj-Napoca',
+        'Iasi': 'Iasi',
+        'Timisoara': 'Timisoara',
+        'Sibiu': 'Sibiu',
+    }
+    county_map = {
+        'Bucuresti': 'Bucuresti',
+        'Cluj-Napoca': 'Cluj',
+        'Iasi': 'Iasi',
+        'Timisoara': 'Timis',
+        'Sibiu': 'Sibiu',
+    }
 
-        city = job.find('p', class_='filter-subhead cw-bw').text.split(',')[0].strip()
-        if city == 'Guadalajara':
-            continue
-        elif city == 'Remote':
-            remote_text = 'remote'
-            city = ''
-        else:
-            remote_text = ''
+    page = 1
 
-        # get jobs items from response
-        job_list.append(Item(
-            job_title=job.find('h3').text.strip(),
-            job_link=job.find('a')['href'],
-            company='rinf.tech',
-            country='Romania',
-            county='',
-            city=city,
-            remote=remote_text,
-        ).to_dict())
+    while page <= 6:
+        url = 'https://jobs.rinf.tech' if page == 1 else f'https://jobs.rinf.tech/?page={page}'
+        soup = GetStaticSoup(url)
+        jobs = soup.select('main div.flex.flex-col.gap-3.border-b-2.border-border-secondary.py-4.text-left')
+
+        if not jobs:
+            break
+
+        for job in jobs:
+
+            title_link = job.find('a', href=True)
+            if not title_link:
+                continue
+
+            location_items = job.select('div.flex.flex-wrap.gap-6.text-sm p.text-xs.font-semibold.text-ring')
+            location_text = location_items[2].get_text(strip=True) if len(location_items) >= 3 else ''
+
+            if location_text == 'Guadalajara':
+                continue
+
+            if location_text == 'Remote':
+                remote_text = 'remote'
+                city = ''
+            else:
+                remote_text = ''
+                location_parts = [part.strip() for part in location_text.replace('|', ',').split(',') if part.strip()]
+                romanian_cities = [city_map[part] for part in location_parts if part in city_map]
+
+                if location_text == 'Romania':
+                    romanian_cities = ['Bucuresti']
+                    remote_text = 'remote'
+
+                if not romanian_cities:
+                    continue
+
+                city = romanian_cities[0] if len(romanian_cities) == 1 else romanian_cities
+
+            # get jobs items from response
+            job_list.append(Item(
+                job_title=title_link.get_text(strip=True),
+                job_link=f"https://jobs.rinf.tech{title_link['href']}",
+                company='rinf.tech',
+                country='Romania',
+                county=[county_map.get(single_city, get_county(single_city)) for single_city in city] if isinstance(city, list) else (county_map.get(city, get_county(city)) if city else ''),
+                city=city,
+                remote=remote_text,
+            ).to_dict())
+
+        page += 1
 
     return job_list
 
