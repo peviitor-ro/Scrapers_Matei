@@ -33,7 +33,6 @@ jobs:
           tar -xzf "$OPENCODE_TMP_DIR/opencode.tar.gz" -C "$OPENCODE_TMP_DIR"
           sudo install "$OPENCODE_TMP_DIR/opencode" /usr/local/bin/opencode
           rm -rf "$OPENCODE_TMP_DIR"
-          opencode --version
 
       - name: All scrapers runs
         env:
