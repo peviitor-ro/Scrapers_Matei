@@ -1,6 +1,7 @@
 # Company ---> autocobalcescu
 # Link ------> https://www.autocobalcescu.ro/hr
 
+from requests.exceptions import RequestException
 from __utils import (
     GetStaticSoup,
     get_county,
@@ -13,7 +14,11 @@ def scraper():
 
     # scrape data from AutoCobalcescu scraper.
 
-    soup = GetStaticSoup("https://www.autocobalcescu.ro/hr")
+    try:
+        soup = GetStaticSoup("https://www.autocobalcescu.ro/hr")
+    except RequestException:
+        return []
+
     job_list = []
     
     for job in soup.find_all('div', class_= 'col-12'):
