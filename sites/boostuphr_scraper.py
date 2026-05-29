@@ -6,6 +6,9 @@ from __utils import (
     Item,
     UpdateAPI,
 )
+from __utils.default_headers import DEFAULT_HEADERS
+import requests
+from bs4 import BeautifulSoup
 from urllib.parse import quote
 
 
@@ -20,7 +23,7 @@ def scraper():
 
         get_link = job.find('a')['href']
         url = quote(get_link, safe = ':/')
-        link_soup = GetStaticSoup(get_link)
+        link_soup = BeautifulSoup(requests.get(get_link, headers=DEFAULT_HEADERS).text, 'lxml')
         job_type = link_soup.find('div', attrs = {'id': 'comp-lo4aysd24'}).text.strip()
         get_city = job.find('p', class_ = 'font_8 wixui-rich-text__text').text.split(',')[0].strip()
         county = ''
