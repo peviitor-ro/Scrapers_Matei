@@ -65,10 +65,9 @@ def get_token():
 
     regex = r'"token":"([^"]+)"'
     matches = re.findall(regex, str(soup))
-    if matches:
-        token = matches[0]
-
-    return token.strip()
+    if not matches:
+        return ""
+    return matches[0].strip()
 
 
 def scraper():
@@ -77,9 +76,13 @@ def scraper():
 
     url, headers, data = prepare_post_request()
     response = requests.post(url, headers=headers, json=data)
-    json_data = response.json()
 
     job_list = []
+
+    if response.status_code != 200:
+        return job_list
+
+    json_data = response.json()
 
     for job in json_data['data']['requisitions']:
         get_country = job['locations'][0]['country']
