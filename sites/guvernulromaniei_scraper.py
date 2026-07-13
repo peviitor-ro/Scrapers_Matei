@@ -13,6 +13,7 @@ def scraper():
     job_list = []
     url = "https://posturi.gov.ro"
     index = 1
+    pagina = 1
     soup = GetStaticSoup(url)
     for job in soup.find_all('div', class_='nav-links'):
         pagina = int(job.find('a').findNext('a').text)
