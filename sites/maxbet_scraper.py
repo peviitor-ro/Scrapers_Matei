@@ -2,19 +2,25 @@
 # Company ---> maxbet
 # Link ------> https://maxbetgroup.ro/joburi
 
+import urllib3
+import requests
+from bs4 import BeautifulSoup
 from __utils import (
-    GetStaticSoup,
     get_county,
     Item,
     UpdateAPI,
 )
+from __utils.default_headers import DEFAULT_HEADERS
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 def scraper():
 
     # scrape data from maxbet scraper.
 
-    soup = GetStaticSoup("https://maxbetgroup.ro/joburi")
+    response = requests.get("https://maxbetgroup.ro/joburi", headers=DEFAULT_HEADERS, verify=False)
+    soup = BeautifulSoup(response.text, 'lxml')
     job_list = []
     
     for job in soup.find_all('div', class_ = 'col-xl-6 col-lg-6 col-md-6 mb-3'):
