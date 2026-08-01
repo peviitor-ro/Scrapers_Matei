@@ -24,7 +24,8 @@ def scraper():
         get_link = job.find('a')['href']
         url = quote(get_link, safe = ':/')
         link_soup = BeautifulSoup(requests.get(get_link, headers=DEFAULT_HEADERS).text, 'lxml')
-        job_type = link_soup.find('div', attrs = {'id': 'comp-lo4aysd24'}).text.strip()
+        job_type_div = link_soup.find('div', attrs = {'id': 'comp-lo4aysd24'})
+        job_type = job_type_div.text.strip() if job_type_div else ''
         get_city = job.find('p', class_ = 'font_8 wixui-rich-text__text').text.split(',')[0].strip()
         county = ''
 
