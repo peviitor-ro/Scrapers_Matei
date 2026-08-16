@@ -14,7 +14,7 @@ def scraper():
 
     # scrape data from Bookster scraper.
 
-    json_data = GetRequestJson("https://cariere.bookster.ro/api/jobs/list")
+    json_data = GetRequestJson("https://cariere.bookster.ro/api/jobs/list", verify=False)
     job_list = []
 
     for json_job in json_data:

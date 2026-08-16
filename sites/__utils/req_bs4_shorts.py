@@ -22,14 +22,14 @@ class GetStaticSoup:     # This class return soup object from static page!
 
 class GetRequestJson:     # This class return JSON object from get requests!
 
-    def __new__(cls, link, custom_headers=None):
+    def __new__(cls, link, custom_headers=None, verify=True):
 
         headers = DEFAULT_HEADERS.copy()
 
         if custom_headers:
             headers.update(custom_headers)
 
-        response = session.get(link, headers=headers)
+        response = session.get(link, headers=headers, verify=verify)
 
         # Parse response to JSON and return dict object
         try:
