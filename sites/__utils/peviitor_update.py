@@ -63,6 +63,8 @@ class UpdateAPI:
         #######################################################################
 
         print(json.dumps(data_jobs, indent=4))
+        if not data_jobs:
+            print(f'[NO JOBS] {company_name}')
         if post_request_to_server.status_code == 200:
             print(f'Update ---> succesfuly added {len(data_jobs)} jobs')
         else:
