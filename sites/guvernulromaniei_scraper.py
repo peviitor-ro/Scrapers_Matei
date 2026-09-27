@@ -2,8 +2,18 @@ from __utils import (
     GetStaticSoup,
     Item,
     UpdateAPI,
-    get_county
 )
+
+BASE_URL = "https://posturi.gov.ro/toate-posturile/"
+
+
+def parse_location(location: str):
+    """location is either 'CITY, County' or just a county name."""
+    if "," in location:
+        city, county = (part.strip() for part in location.split(",", 1))
+    else:
+        city = county = location.strip()
+    return city, county
 
 
 def scraper():
@@ -11,30 +21,29 @@ def scraper():
     # scrape data from guvernulromaniei scraper.
 
     job_list = []
-    url = "https://posturi.gov.ro"
-    index = 1
-    pagina = 1
-    soup = GetStaticSoup(url)
-    for job in soup.find_all('div', class_='nav-links'):
-        pagina = int(job.find('a').findNext('a').text)
+    page = 1
 
-    while index <= pagina:
-        soup = GetStaticSoup(url)
-        for job in soup.find_all('article', class_='box'):
+    while True:
+        soup = GetStaticSoup(f"{BASE_URL}?pg_page={page}")
+        jobs = soup.find_all('article', class_='pg-card')
+        if not jobs:
+            break
 
-            location = job.find('div', class_='locatie').text.strip()
-            # get jobs items from response
+        for job in jobs:
+            city, county = parse_location(
+                job.find('div', class_='pg-card-city').find('span').text.strip()
+            )
             job_list.append(Item(
-                job_title=job.find('div', class_='title').find('a').text.strip(),
-                job_link=job.find('div', class_='title').find('a')['href'],
+                job_title=job.find('div', class_='pg-card-h').text.strip(),
+                job_link=job.find('a', class_='pg-card-link')['href'],
                 company='GuvernulRomaniei',
                 country='Romania',
-                county=get_county(location),
-                city=location,
-                remote='on-site' if location else 'remote',
+                county=county,
+                city=city,
+                remote='remote' if not city else 'on-site',
             ).to_dict())
-        index += 1
-        url = f'https://posturi.gov.ro/page/{index}'
+
+        page += 1
 
     return job_list
 
