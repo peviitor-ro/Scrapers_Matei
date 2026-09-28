@@ -1,47 +1,37 @@
 # Company ---> Auto1 Group
 # Link ------> https://www.auto1-group.com/en/jobs/?country=Romania
 
-import json
-from html import unescape
+import requests
 
 from __utils import (
-    GetRequestJson,
-    GetStaticSoup,
     Item,
     UpdateAPI,
     get_county,
 )
 
-
-def _extract_jobs(json_data):
-
-    jobs_data = json_data.get('jobs', {})
-    hits = jobs_data.get('hits', [])
-
-    if isinstance(hits, dict):
-        return hits.get('hits', [])
-
-    return hits
+SEARCH_API = 'https://www.auto1-group.com/smart-recruiters/jobs/search/'
+JOBS_PAGE = 'https://www.auto1-group.com/en/jobs/'
+RESULTS_PER_PAGE = 50
+MAX_PAGES = 20
 
 
-def _get_jobs_from_page():
+def _search_jobs(page):
 
-    soup = GetStaticSoup('https://www.auto1-group.com/en/jobs/?country=Romania')
-    jobs_node = soup.select_one('#smart-recruiters-job-data')
+    response = requests.post(
+        SEARCH_API,
+        json={
+            'filters': {'country': 'Romania'},
+            'options': {'currentPage': page, 'resultsPerPage': RESULTS_PER_PAGE},
+        },
+        headers={'Content-Type': 'application/json'},
+    )
 
-    if not jobs_node:
-        return []
+    if response.status_code != 200:
+        return [], 0
 
-    jobs_json = jobs_node.get('data-initial-jobs', '')
-    if not jobs_json:
-        return []
+    jobs = response.json().get('jobs', {})
 
-    json_data = json.loads(unescape(jobs_json))
-
-    return [
-        job for job in _extract_jobs(json_data)
-        if job.get('_source', {}).get('locationCountry') == 'Romania'
-    ]
+    return jobs.get('hits', []), jobs.get('total', {}).get('value', 0)
 
 
 def _normalize_city(job_source):
@@ -55,19 +45,14 @@ def _normalize_city(job_source):
 
 
 def scraper():
+
     # scrape data from Auto1 Group scraper.
 
-    page = 1
     job_list = []
+    page = 1
 
-    while True:
-
-        json_data = GetRequestJson(f"https://www.auto1-group.com/smart-recruiters/jobs/search/?page={page}&country=Romania")
-
-        if not isinstance(json_data, dict):
-            jobs = _get_jobs_from_page()
-        else:
-            jobs = _extract_jobs(json_data)
+    while page <= MAX_PAGES:
+        jobs, total = _search_jobs(page)
 
         if not jobs:
             break
@@ -78,8 +63,8 @@ def scraper():
 
             # get jobs items from response
             job_list.append(Item(
-                job_title = source['title'],
-                job_link = f'https://www.auto1-group.com/en/jobs/{source["url"]}',
+                job_title = source.get('title', ''),
+                job_link = f'{JOBS_PAGE}{source.get("url", "")}',
                 company = 'auto1',
                 country = 'Romania',
                 county = get_county(town),
@@ -87,7 +72,7 @@ def scraper():
                 remote = 'remote' if source.get('remote') else 'on-site',
             ).to_dict())
 
-        if not isinstance(json_data, dict):
+        if len(job_list) >= total:
             break
 
         page = page + 1
