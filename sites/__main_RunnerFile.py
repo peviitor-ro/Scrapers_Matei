@@ -5,6 +5,19 @@ import sys
 import tempfile
 from pathlib import Path
 
+from __utils.empty_jobs_repair import (
+    ATTEMPT_ENV,
+    COOLDOWN_DAYS,
+    DEPTH_ENV,
+    MAX_REPAIR_DEPTH,
+    STATE_PATH,
+    format_timestamp,
+    get_cooldown_until,
+    load_state,
+    parse_timestamp,
+    utc_now,
+)
+
 
 EXCLUDE = {
     "__main_RunnerFile.py",
@@ -14,10 +27,19 @@ EXCLUDE = {
 }
 SITES_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SITES_DIR.parent
-SCRAPER_TIMEOUT_SECONDS = int(os.getenv("SCRAPER_TIMEOUT_SECONDS", "60"))
+SCRAPER_TIMEOUT_SECONDS = int(os.getenv("SCRAPER_TIMEOUT_SECONDS", "1800"))
 REPAIR_TIMEOUT_SECONDS = int(os.getenv("OPENCODE_REPAIR_TIMEOUT", "900"))
 MAX_LOG_LENGTH = 4000
 NO_JOBS_MARKER = "[NO JOBS]"
+
+# un scraper care ajunge la lista goala ruleaza repararea cu OpenCode chiar in
+# interiorul procesului sau, deci bugetul extern trebuie sa acopere si repair-ul
+if 0 < SCRAPER_TIMEOUT_SECONDS < REPAIR_TIMEOUT_SECONDS + 300:
+    SCRAPER_TIMEOUT_SECONDS = REPAIR_TIMEOUT_SECONDS + 300
+    print(
+        f"Warning: SCRAPER_TIMEOUT_SECONDS raised to {SCRAPER_TIMEOUT_SECONDS}s "
+        f"so the in-scraper auto-repair (max {REPAIR_TIMEOUT_SECONDS}s) can finish."
+    )
 
 
 def snapshot_sibling_files(script_path):
@@ -62,25 +84,125 @@ def parse_no_jobs(stdout):
     return no_jobs_companies
 
 
+def format_remaining(delta):
+    total_seconds = int(delta.total_seconds())
+    if total_seconds <= 0:
+        return "expired"
+
+    days, remainder = divmod(total_seconds, 86400)
+    hours, remainder = divmod(remainder, 3600)
+    minutes = remainder // 60
+
+    if days:
+        return f"{days}d {hours}h left"
+    if hours:
+        return f"{hours}h {minutes}m left"
+    return f"{minutes}m left"
+
+
+def print_cache_summary():
+    state = load_state()
+
+    try:
+        cache_display = STATE_PATH.relative_to(REPO_ROOT)
+    except ValueError:
+        cache_display = STATE_PATH
+
+    if not state:
+        print(f"Empty-jobs cache: no entries ({cache_display} missing or empty).")
+        print("  Auto-repair will run for every scraper returning 0 jobs, with no cooldown.")
+        return
+
+    now = utc_now()
+    on_cooldown = []
+    cooldown_over = []
+
+    for state_key, entry in sorted(state.items()):
+        if not isinstance(entry, dict):
+            continue
+
+        company = entry.get("company") or state_key
+        cooldown_until = get_cooldown_until(REPO_ROOT / state_key)
+
+        if cooldown_until and now < cooldown_until:
+            on_cooldown.append((state_key, company, cooldown_until))
+        else:
+            cooldown_over.append(
+                (state_key, company, parse_timestamp(entry.get("last_confirmed_empty_at")))
+            )
+
+    print(f"Empty-jobs cache: {len(state)} scraper(s) known to return 0 jobs ({cache_display}).")
+    print(f"  Cooldown lasts {COOLDOWN_DAYS} days after a confirmed empty result.")
+
+    for state_key, company, cooldown_until in on_cooldown:
+        print(f"  [on cooldown] {state_key} | {company} | {format_remaining(cooldown_until - now)}")
+
+    for state_key, company, confirmed_at in cooldown_over:
+        confirmed = confirmed_at.strftime("%Y-%m-%d %H:%M UTC") if confirmed_at else "unknown"
+        print(f"  [cooldown over] {state_key} | {company} | confirmed empty {confirmed}")
+
+    if not on_cooldown:
+        print("  No scraper is currently on cooldown.")
+
+
+def describe_empty_scrapers(all_no_jobs):
+    """
+    ... maps the company names collected during the run to the cooldown state
+    """
+
+    state = load_state()
+    if not state:
+        return
+
+    by_company = {entry.get("company"): key for key, entry in state.items() if isinstance(entry, dict)}
+    now = utc_now()
+
+    for company in sorted(set(all_no_jobs)):
+        state_key = by_company.get(company)
+        if not state_key:
+            print(f"  - {company} | first time seen, no cooldown yet")
+            continue
+
+        cooldown_until = get_cooldown_until(REPO_ROOT / state_key)
+        if cooldown_until and now < cooldown_until:
+            print(f"  - {company} | on cooldown | {format_remaining(cooldown_until - now)}")
+        else:
+            print(f"  - {company} | OpenCode verification will run")
+
+
 def print_no_jobs_summary(all_no_jobs):
     print()
     print("=" * 50)
     if all_no_jobs:
         print(f"FIRME FARA JOBURI ({len(all_no_jobs)}):")
-        for company in sorted(set(all_no_jobs)):
-            print(f"  - {company}")
+        describe_empty_scrapers(all_no_jobs)
     else:
         print("Toate firmele au joburi disponibile.")
     print("=" * 50)
 
 
 def run_scraper(script_path):
+    command = [sys.executable, str(script_path)]
+
+    if SCRAPER_TIMEOUT_SECONDS <= 0:
+        return subprocess.run(command, capture_output=True, text=True, cwd=REPO_ROOT)
+
     return subprocess.run(
-        [sys.executable, str(script_path)],
+        command,
         capture_output=True,
         text=True,
         cwd=REPO_ROOT,
         timeout=SCRAPER_TIMEOUT_SECONDS,
+    )
+
+
+def log_scraper_timeout(script_path, after_repair=False):
+    minutes = SCRAPER_TIMEOUT_SECONDS / 60
+    stage = "after auto-repair" if after_repair else "while scraping"
+    print(
+        f"Timeout {stage} {script_path.name} after {minutes:.0f} min. "
+        f"Scraper skipped without a verdict. Raise SCRAPER_TIMEOUT_SECONDS "
+        f"(current: {SCRAPER_TIMEOUT_SECONDS}) or set it to 0 to disable."
     )
 
 
@@ -143,6 +265,12 @@ Captured stdout:
             context_file.write(repair_context)
             context_file_path = context_file.name
 
+        # agentul ruleaza el insusi scraperul ca sa-si verifice repararea; fara
+        # guard, acel run ar porni inca un opencode run, la infinit
+        repair_env = os.environ.copy()
+        repair_env[ATTEMPT_ENV] = "1"
+        repair_env[DEPTH_ENV] = str(int(os.getenv(DEPTH_ENV, "0")) + 1)
+
         action = subprocess.run(
             [
                 "opencode",
@@ -159,6 +287,7 @@ Captured stdout:
             capture_output=True,
             text=True,
             cwd=REPO_ROOT,
+            env=repair_env,
             timeout=REPAIR_TIMEOUT_SECONDS,
         )
     except subprocess.TimeoutExpired:
@@ -190,7 +319,7 @@ def test_scraper_repair(scraper_name):
         action = run_scraper(script_path)
     except subprocess.TimeoutExpired:
         cleanup_created_sibling_files(script_path, existing_files)
-        print(f"Timeout scraping {script_path.name}")
+        log_scraper_timeout(script_path)
         return False
 
     cleanup_created_sibling_files(script_path, existing_files)
@@ -210,7 +339,7 @@ def test_scraper_repair(scraper_name):
         repaired_action = run_scraper(script_path)
     except subprocess.TimeoutExpired:
         cleanup_created_sibling_files(script_path, existing_files)
-        print(f"Timeout scraping after auto-repair {script_path.name}")
+        log_scraper_timeout(script_path, after_repair=True)
         return False
 
     cleanup_created_sibling_files(script_path, existing_files)
@@ -225,6 +354,9 @@ def test_scraper_repair(scraper_name):
 
 
 def main():
+    print_cache_summary()
+    print()
+
     all_no_jobs = []
 
     for site in sorted(os.listdir(SITES_DIR)):
@@ -237,7 +369,7 @@ def main():
             action = run_scraper(script_path)
         except subprocess.TimeoutExpired:
             cleanup_created_sibling_files(script_path, existing_files)
-            print("Timeout scraping " + site)
+            log_scraper_timeout(script_path)
             continue
 
         cleanup_created_sibling_files(script_path, existing_files)
@@ -260,7 +392,7 @@ def main():
             repaired_action = run_scraper(script_path)
         except subprocess.TimeoutExpired:
             cleanup_created_sibling_files(script_path, existing_files)
-            print("Timeout scraping after auto-repair " + site)
+            log_scraper_timeout(script_path, after_repair=True)
             continue
 
         cleanup_created_sibling_files(script_path, existing_files)
@@ -275,6 +407,8 @@ def main():
             print(truncate_output(repaired_action.stderr))
 
     print_no_jobs_summary(all_no_jobs)
+    print()
+    print_cache_summary()
 
 
 class Scraper:
@@ -282,6 +416,9 @@ class Scraper:
         self.exclude = set(EXCLUDE if exclude is None else exclude)
 
     def run(self):
+        print_cache_summary()
+        print()
+
         all_no_jobs = []
 
         for site in sorted(os.listdir(SITES_DIR)):
@@ -294,7 +431,7 @@ class Scraper:
                 action = run_scraper(script_path)
             except subprocess.TimeoutExpired:
                 cleanup_created_sibling_files(script_path, existing_files)
-                print(f"Timeout scraping {site}")
+                log_scraper_timeout(script_path)
                 continue
 
             cleanup_created_sibling_files(script_path, existing_files)
@@ -310,6 +447,8 @@ class Scraper:
             print(truncate_output(action.stderr))
 
         print_no_jobs_summary(all_no_jobs)
+        print()
+        print_cache_summary()
 
 
 if __name__ == "__main__":
