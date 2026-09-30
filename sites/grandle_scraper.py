@@ -1,29 +1,32 @@
 # Company ---> grandle
-# Link ------> https://gradle.com/careers/
+# Link ------> https://gradle.com/careers/ (redirects to https://develocity.ai/careers/)
+# Board -----> https://job-boards.greenhouse.io/gradle (jobs public API)
 
 from __utils import (
-    GetStaticSoup,
+    GetRequestJson,
     Item,
     UpdateAPI,
 )
+
+JOBS_API_LINK = 'https://boards-api.greenhouse.io/v1/boards/gradle/jobs'
 
 
 def scraper():
 
     # scrape data from grandle scraper.
 
-    soup = GetStaticSoup("https://gradle.com/careers/")
+    response = GetRequestJson(JOBS_API_LINK)
     job_list = []
-    
-    for job in soup.find_all('li', class_ = 'careers__jobs-list'):
 
-        check = job.find('div', class_ = 'careers__job-location').text.strip()
-        if check == 'Europe' or check == 'Anywhere':
+    for job in response.get('jobs', []):
+
+        check = job.get('location', {}).get('name', '').strip()
+        if check.startswith('Europe') or check == 'Anywhere':
 
         # get jobs items from response
             job_list.append(Item(
-                job_title = job.find('a').text.strip(),
-                job_link = job.find('a')['href'],
+                job_title = job['title'].strip(),
+                job_link = job['absolute_url'],
                 company = 'Grandle',
                 country = 'Romania',
                 county = '',

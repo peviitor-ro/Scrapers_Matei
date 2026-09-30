@@ -25,7 +25,7 @@ def scraper():
 
     while True:
         soup = GetStaticSoup(f"{BASE_URL}?pg_page={page}")
-        jobs = soup.find_all('article', class_='pg-card')
+        jobs = soup.find_all('a', class_='pg-card')
         if not jobs:
             break
 
@@ -35,7 +35,7 @@ def scraper():
             )
             job_list.append(Item(
                 job_title=job.find('div', class_='pg-card-h').text.strip(),
-                job_link=job.find('a', class_='pg-card-link')['href'],
+                job_link=job['href'],
                 company='GuvernulRomaniei',
                 country='Romania',
                 county=county,

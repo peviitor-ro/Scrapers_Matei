@@ -2,19 +2,34 @@
 # Link ------> https://www.intelactsoft.com/jobs/
 
 from __utils import (
-    GetStaticSoup,
-    get_county,
+    DEFAULT_HEADERS,
     Item,
     UpdateAPI,
+    get_county,
 )
+
+import requests
+from bs4 import BeautifulSoup
 
 
 def scraper():
 
     # scrape data from intelactsoft scraper.
 
-    soup = GetStaticSoup("https://www.intelactsoft.com/jobs/")
     job_list = []
+
+    response = requests.get(
+        "https://www.intelactsoft.com/jobs/",
+        headers=DEFAULT_HEADERS,
+        timeout=30,
+    )
+
+    # The website was rebuilt and the careers section was dropped, so the
+    # old /jobs/ page now answers 404 and no longer lists any position.
+    if response.status_code != 200:
+        return job_list
+
+    soup = BeautifulSoup(response.text, 'lxml')
 
     for job in soup.find_all('div', attrs = {'class': 'mt-5 col-xl-4 col-lg-6 link'}):
 
@@ -35,7 +50,7 @@ def scraper():
 def main():
 
     company_name = "Intelactsoft"
-    logo_link = "https://www.intelactsoft.com/wp-content/themes/intelactsoft/assets/logo.svg"
+    logo_link = "https://intelactsoft.com/assets/intelactsoft_complet_alb-SqG6odA0.svg"
 
     jobs = scraper()
 

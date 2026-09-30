@@ -1,65 +1,97 @@
 # Company ---> GiGroup
 # Link ------> https://ro.gigroup.com/oferta-noastra-de-locuri-de-munca
-import requests
-from bs4 import BeautifulSoup
+from urllib.parse import urljoin
+
 from __utils import (
+    GetStaticSoup,
     get_county,
     Item,
     UpdateAPI,
 )
 
+BASE_URL = 'https://ro.gigroup.com'
+JOBS_LINK = f'{BASE_URL}/oferta-noastra-de-locuri-de-munca/'
 
-def _normalize_city(title: str, city: str) -> str:
 
-    if '-' in city:
-        city = city.split('-')[0].strip()
+def _clean_city(city: str) -> str:
+
+    city = ' '.join(city.split())
+
+    # location is built like "Bucuresti - Sectorul 6" -> keep only the city
+    if ' - ' in city:
+        city = city.split(' - ')[0].strip()
 
     if city == 'Cluj':
         city = 'Cluj-Napoca'
 
-    if title == 'Director Sucursala':
-        return 'Targu-Mures'
-
-    if title in ('Tehnician de calitate', 'Operator turnatorie'):
-        return 'Pitești'
-
     return city
+
+
+def _get_location(job) -> str:
+
+    for row in job.select('div.job-item-meta-row'):
+
+        if row.select_one('span.bi-geo-alt'):
+            return ' '.join(row.get_text(' ', strip=True).split())
+
+    return ''
+
+
+def _get_city_and_county(location: str):
+
+    # location is built like "Darasti-Ilfov, Ilfov, Bucuresti - Ilfov"
+    parts = [part.strip() for part in location.split(',') if part.strip()]
+
+    if not parts:
+        return '', None
+
+    city = _clean_city(parts[0])
+
+    for candidate in (city, *(_clean_city(part) for part in parts[1:])):
+        county = get_county(candidate)
+
+        if county:
+            return candidate, county
+
+    return city, None
 
 
 def scraper():
 
     # scrape data from GiGroup scraper.
-    response = requests.get('https://ro.gigroup.com/oferta-noastra-de-locuri-de-munca/', timeout=30)
-    soup = BeautifulSoup(response.text, 'html.parser')
+    soup = GetStaticSoup(JOBS_LINK)
 
     # list with data
     job_list = []
 
-    for job in soup.select('article.workRow'):
-        title_block = job.select_one('div.titleBlock a')
-        if not title_block:
+    for job in soup.select('article.ggp-job-item'):
+
+        title_link = job.select_one('div.ggp-job-title-wrapper a.ggp-job-title-url')
+
+        if not title_link:
             continue
 
-        title = title_block.get_text(strip=True)
-        location_nodes = job.select('div.span8 div.workCol2 h3')
+        title = title_link.get_text(strip=True)
+        link = title_link.get('href')
 
-        if len(location_nodes) < 2:
+        if not link:
             continue
 
-        location_text = location_nodes[1].get_text(strip=True).split(',')[0].strip()
-        location_clear = _normalize_city(title, location_text)
+        city, county = _get_city_and_county(_get_location(job))
+
+        if not city:
+            continue
 
         # get jobs items from response
         job_list.append(Item(
             job_title = title,
-            job_link = title_block.get('href'),
+            job_link = urljoin(BASE_URL, link),
             company = 'GiGroup',
             country = 'Romania',
-            county = get_county(location_clear),
-            city = location_clear,
+            county = county,
+            city = city,
             remote = 'on-site',
         ).to_dict())
-
 
     return job_list
 
