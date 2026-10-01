@@ -19,7 +19,12 @@ def scraper():
 
     # scrape data from maxbet scraper.
 
-    response = requests.get("https://maxbetgroup.ro/joburi", headers=DEFAULT_HEADERS, verify=False)
+    response = requests.get(
+        "https://maxbetgroup.ro/joburi",
+        headers=DEFAULT_HEADERS,
+        verify=False,
+        timeout=30,
+    )
     soup = BeautifulSoup(response.text, 'lxml')
     job_list = []
     
