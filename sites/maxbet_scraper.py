@@ -33,13 +33,22 @@ def get_archived_html(link):
     # last snapshot of the given page kept by the wayback machine.
     # the availability api only finds snapshots when given the full url,
     # a scheme less one answers with an empty snapshot list.
-    snapshot = requests.get(
-        "https://archive.org/wayback/available",
-        params={'url': link},
-        timeout=30,
-    ).json()['archived_snapshots'].get('closest')
+    try:
+        response = requests.get(
+            "https://archive.org/wayback/available",
+            params={'url': link},
+            timeout=30,
+        )
+        data = response.json()
+        snapshot = data.get('archived_snapshots', {}).get('closest') if data else None
+    except Exception:
+        snapshot = None
 
-    archived_link = f"https://web.archive.org/web/{snapshot.get('timestamp', '')}id_/{link}"
+    if not snapshot:
+        # fallback: try to construct a recent snapshot URL or just retry without snapshot
+        archived_link = f"https://web.archive.org/web/20250000000000id_/{link}"
+    else:
+        archived_link = f"https://web.archive.org/web/{snapshot.get('timestamp', '')}id_/{link}"
 
     for attempt in range(ARCHIVE_ATTEMPTS):
         try:
