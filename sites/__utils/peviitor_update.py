@@ -14,6 +14,7 @@ import json
 import time
 
 from .empty_jobs_repair import (
+    NO_JOBS_MARKER,
     clear_cooldown_for_calling_scraper,
     maybe_repair_empty_jobs_output,
 )
@@ -84,8 +85,10 @@ class UpdateAPI:
 
         print(json.dumps(data_jobs, indent=4))
         if not data_jobs:
+            # markerul se tipareste inainte de hook: repararea reusita se
+            # incheie cu SystemExit(0) si ar suprima orice print de dupa el
+            print(f'{NO_JOBS_MARKER} {company_name}', flush=True)
             maybe_repair_empty_jobs_output(company_name)
-            print(f'[NO JOBS] {company_name}')
         else:
             clear_cooldown_for_calling_scraper()
         if post_request_to_server is None:
