@@ -1,5 +1,5 @@
 # Company ---> TemaEnergy
-# Link ------> https://tema-energy.ro/despre-noi/cariere/
+# Link ------> https://tema-energy.ro/cariere/
 
 from __utils import (
     GetStaticSoup,
