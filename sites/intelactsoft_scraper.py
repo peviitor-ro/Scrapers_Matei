@@ -1,5 +1,5 @@
 # Company ---> Intelactsoft
-# Link ------> https://www.intelactsoft.com/jobs/
+# Link ------> https://careers.smartrecruiters.com/Intelligence1
 
 from __utils import (
     DEFAULT_HEADERS,
@@ -8,8 +8,9 @@ from __utils import (
     get_county,
 )
 
+import re
+
 import requests
-from bs4 import BeautifulSoup
 
 
 def scraper():
@@ -19,24 +20,28 @@ def scraper():
     job_list = []
 
     response = requests.get(
-        "https://www.intelactsoft.com/jobs/",
+        "https://api.smartrecruiters.com/v1/companies/Intelligence1/postings",
         headers=DEFAULT_HEADERS,
         timeout=30,
     )
 
-    # The website was rebuilt and the careers section was dropped, so the
-    # old /jobs/ page now answers 404 and no longer lists any position.
+    # The company website no longer has a careers page. Its open positions are
+    # published on SmartRecruiters instead.
     if response.status_code != 200:
         return job_list
 
-    soup = BeautifulSoup(response.text, 'lxml')
+    for job in response.json().get('content', []):
 
-    for job in soup.find_all('div', attrs = {'class': 'mt-5 col-xl-4 col-lg-6 link'}):
+        title = job.get('name', '').strip()
+        if not title:
+            continue
+
+        slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
 
         # get jobs items from response
         job_list.append(Item(
-            job_title = job.find('h4').text,
-            job_link = 'https://www.intelactsoft.com' + job.find('div', attrs = {'class': 'job'}).find('a')['href'],
+            job_title = title,
+            job_link = f"https://jobs.smartrecruiters.com/Intelligence1/{job['id']}-{slug}",
             company = 'Intelactsoft',
             country = 'Romania',
             county = get_county('Bucuresti'),

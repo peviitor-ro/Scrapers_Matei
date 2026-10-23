@@ -2,6 +2,7 @@
 # Link ------> https://dowjones.jobs/jobs/?location=Romania
 
 import re
+import time
 import unicodedata
 
 from __utils import (
@@ -25,6 +26,27 @@ SEARCH_HEADERS = {
 # the search api never returns more than 10 jobs per page, so we walk the pages.
 NUM_ITEMS = 10
 
+REQUEST_ATTEMPTS = 3
+
+
+def get_search_page(offset: int):
+    for attempt in range(REQUEST_ATTEMPTS):
+        try:
+            json_data = GetRequestJson(
+                f"{SEARCH_API}?location=Romania&num_items={NUM_ITEMS}&page=1&offset={offset}",
+                custom_headers = SEARCH_HEADERS,
+            )
+        except Exception:
+            json_data = None
+
+        if isinstance(json_data, dict) and 'jobs' in json_data:
+            return json_data
+
+        if attempt + 1 < REQUEST_ATTEMPTS:
+            time.sleep(attempt + 1)
+
+    return None
+
 
 def get_job_link(job: dict) -> str:
     # the site builds the detail page as /<location slug>/<title slug>/<guid>/job/
@@ -44,12 +66,9 @@ def scraper():
 
     while True:
 
-        json_data = GetRequestJson(
-            f"{SEARCH_API}?location=Romania&num_items={NUM_ITEMS}&page=1&offset={offset}",
-            custom_headers = SEARCH_HEADERS,
-        )
+        json_data = get_search_page(offset)
 
-        if not isinstance(json_data, dict):
+        if json_data is None:
             break
 
         jobs = json_data.get('jobs') or []
