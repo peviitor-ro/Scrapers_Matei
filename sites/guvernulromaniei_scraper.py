@@ -24,26 +24,39 @@ def scraper():
     page = 1
 
     while True:
-        soup = GetStaticSoup(f"{BASE_URL}?pg_page={page}")
+        try:
+            soup = GetStaticSoup(f"{BASE_URL}?pg_page={page}")
+        except Exception:
+            break
         jobs = soup.find_all('a', class_='pg-card')
         if not jobs:
             break
 
-        for job in jobs:
-            city, county = parse_location(
-                job.find('div', class_='pg-card-city').find('span').text.strip()
-            )
-            job_list.append(Item(
-                job_title=job.find('div', class_='pg-card-h').text.strip(),
-                job_link=job['href'],
-                company='GuvernulRomaniei',
-                country='Romania',
-                county=county,
-                city=city,
-                remote='remote' if not city else 'on-site',
-            ).to_dict())
+        try:
+            for job in jobs:
+                city_el = job.find('div', class_='pg-card-city')
+                if city_el and city_el.find('span'):
+                    city, county = parse_location(city_el.find('span').text.strip())
+                else:
+                    city, county = "", ""
+                title_el = job.find('div', class_='pg-card-h')
+                job_title = title_el.text.strip() if title_el else ""
+                job_link = job.get('href', '')
+                job_list.append(Item(
+                    job_title=job_title,
+                    job_link=job_link,
+                    company='GuvernulRomaniei',
+                    country='Romania',
+                    county=county,
+                    city=city,
+                    remote='remote' if not city else 'on-site',
+                ).to_dict())
+        except Exception:
+            break
 
         page += 1
+        if page > 200:  # safety limit
+            break
 
     return job_list
 

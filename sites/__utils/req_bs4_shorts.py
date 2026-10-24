@@ -8,16 +8,20 @@ session = requests.Session()
 
 class GetStaticSoup:     # This class return soup object from static page!
 
-    def __new__(cls, link, custom_headers=None):
+    def __new__(cls, link, custom_headers=None, timeout=5):
         headers = DEFAULT_HEADERS.copy()
 
         if custom_headers:
             headers.update(custom_headers)
 
-        response = session.get(link, headers=headers)
-
-        # return soup object from static page
-        return BeautifulSoup(response.text, 'lxml')
+        try:
+            response = session.get(link, headers=headers, timeout=timeout)
+            response.raise_for_status()
+            # return soup object from static page
+            return BeautifulSoup(response.text, 'lxml')
+        except Exception:
+            # Return empty soup on failure to allow graceful handling
+            return BeautifulSoup('', 'lxml')
 
 
 class GetRequestJson:     # This class return JSON object from get requests!
