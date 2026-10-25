@@ -21,9 +21,9 @@ def scraper():
     for job in response.get('jobs', []):
 
         check = job.get('location', {}).get('name', '').strip()
-        if check.startswith('Europe') or check == 'Anywhere':
+        if check.startswith('Europe') or check == 'Anywhere' or check.lower() == 'remote' or 'remote' in check.lower():
 
-        # get jobs items from response
+            # get jobs items from response
             job_list.append(Item(
                 job_title = job['title'].strip(),
                 job_link = job['absolute_url'],
@@ -33,7 +33,8 @@ def scraper():
                 city = '',
                 remote = 'remote',
             ).to_dict())
-        else: continue
+        else:
+            continue
 
     return job_list
 
