@@ -8,7 +8,7 @@ from __utils import (
     UpdateAPI,
 )
 
-JOBS_API_LINK = 'https://boards-api.greenhouse.io/v1/boards/gradle/jobs'
+JOBS_API_LINK = 'https://boards-api.greenhouse.io/v1/boards/gradle/jobs?content=true'
 
 
 def scraper():
@@ -21,7 +21,9 @@ def scraper():
     for job in response.get('jobs', []):
 
         check = job.get('location', {}).get('name', '').strip()
-        if check.startswith('Europe') or check == 'Anywhere' or check.lower() == 'remote' or 'remote' in check.lower():
+        content = job.get('content', '').lower()
+        is_remote = 'remote' in check.lower() or 'remote' in content
+        if check.startswith('Europe') or check == 'Anywhere' or is_remote:
 
             # get jobs items from response
             job_list.append(Item(
