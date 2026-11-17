@@ -24,25 +24,31 @@ def scraper():
     job_list = []
 
     for job in json_data.get('jobs', []):
-        location_name = job.get('location', {}).get('name', '')
+        location_name = job.get('location', {}).get('name', '').strip()
 
-        if 'Romania' in location_name:
+        if not location_name:
+            continue
 
-            get_city = location_name.split(',')[0].strip()
+        location_parts = [part.strip() for part in location_name.split(',')]
+        get_city = location_parts[0]
+        get_country = location_parts[-1]
 
-            if get_city in ('Bucharest', 'București'):
-                get_city = 'Bucuresti'
+        if get_city in ('Bucharest', 'București'):
+            get_city = 'Bucuresti'
 
-            # get jobs items from response
-            job_list.append(Item(
-                job_title = job['title'],
-                job_link = job['absolute_url'],
-                company = 'Aylo',
-                country = 'Romania',
-                county = get_county(get_city),
-                city = get_city,
-                remote='',
-            ).to_dict())
+        if get_country == 'Quebec':
+            get_country = 'Canada'
+
+        # get jobs items from response
+        job_list.append(Item(
+            job_title = job['title'],
+            job_link = job['absolute_url'],
+            company = 'Aylo',
+            country = get_country,
+            county = get_county(get_city) or '',
+            city = get_city,
+            remote='',
+        ).to_dict())
 
     return job_list
 
